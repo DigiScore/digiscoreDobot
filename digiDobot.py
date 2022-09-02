@@ -26,6 +26,10 @@ class Digidobot:
         self.interface = Interface(port)
         print('Bot status:', 'connected' if self.bot.connected() else 'not connected')
 
+        # reset any lingering errors
+        # todo - this doesnt
+        self.reset_errors()
+
         print('locating home')
         self.ready_position = self.bot.home()
 
@@ -69,3 +73,6 @@ class Digidobot:
 
             path.append([center[0] + x * scale, center[1] + y * scale, center[2]])
         self.bot.follow_path(path)
+
+    def reset_errors(self):
+        self.interface.clear_alarms_state()

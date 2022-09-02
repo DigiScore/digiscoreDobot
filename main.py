@@ -2,7 +2,9 @@ from digiDobot import Digidobot
 
 digibot = Digidobot()
 
-digibot.circle()
+digibot.circle(50)
+
+digibot.reset_errors()
 
 digibot.home()
 
