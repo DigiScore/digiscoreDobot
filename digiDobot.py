@@ -23,7 +23,7 @@ class Digidobot:
 
         # initiate dobot and connect
         self.bot = Dobot(port)
-        self.interface = Interface(port)
+        self.interface = self.bot.interface
         print('Bot status:', 'connected' if self.bot.connected() else 'not connected')
 
         # reset any lingering errors
