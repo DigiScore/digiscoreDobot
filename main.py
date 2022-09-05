@@ -2,13 +2,30 @@ from digiDobot import Digidobot
 
 digibot = Digidobot()
 
-digibot.circle(50)
+# digibot.circle(50)
 
 digibot.reset_errors()
 
-digibot.home()
+# digibot.home()
 
+# digibot.squiggle([(10, 50, -50),
+#                   (20, 20, 20),
+#                   (-25, -10, 40)
+#                   ])
 
+# digibot.home()
+#
+# digibot.centre()
+
+digibot.move_to((10, -20))
+
+# digibot.circle_arc(1, [(10, 50, -50)])
+digibot.dot()
+
+# digibot.circle_line(2, (-20, 45))
+# digibot.line((-20, 45))
+
+# digibot.circle(10)
 
 
 
