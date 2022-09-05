@@ -2,25 +2,36 @@ from digiDobot import Digidobot
 
 digibot = Digidobot()
 
-# digibot.circle(50)
+# a = digibot.interface.get_alarms_state()
+# print(a)
+#
+# # digibot.bot.print_alarms(a)
+# digibot.interface.clear_alarms_state()
+# a = digibot.interface.get_alarms_state()
+#
+# print(a)
 
-digibot.reset_errors()
+
+
+# digibot.circle(50)
+#
+# digibot.reset_errors()
 
 # digibot.home()
 
-# digibot.squiggle([(10, 50, -50),
-#                   (20, 20, 20),
-#                   (-25, -10, 40)
-#                   ])
+digibot.squiggle([(10, 50, -50),
+                  (20, 20, 20),
+                  (-25, -10, 40)
+                  ])
 
 # digibot.home()
 #
 # digibot.centre()
 
-digibot.move_to((10, -20))
+# digibot.move_to((10, -20))
 
 # digibot.circle_arc(1, [(10, 50, -50)])
-digibot.dot()
+# digibot.dot()
 
 # digibot.circle_line(2, (-20, 45))
 # digibot.line((-20, 45))

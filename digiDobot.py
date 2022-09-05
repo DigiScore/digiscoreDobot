@@ -60,6 +60,7 @@ class Digidobot:
             self.bot.move_to_relative(0, 0, -5, 0)
         else:
             self.bot.move_to_relative(0, 0, 5, 0)
+            self.reset_errors()
 
     def squiggle(self, arc_list: list):
         """accepts a list of tuples that define a sequence of
@@ -142,4 +143,5 @@ class Digidobot:
         self.pen_ready(False)
 
     def reset_errors(self):
+        # self.interface.get_alarms_state()
         self.interface.clear_alarms_state()
