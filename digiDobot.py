@@ -1,12 +1,12 @@
 """Top level class for digi score commands.
-Uses gustafsson's code as low-level interface"""
+Uses gustafsson's code as low-level interface
+Oroginal code https://github.com/AlexGustafsson/dobot-python"""
 
 import sys
 import os
 import math
 
 from serial.tools import list_ports
-from gustafsson.lib.interface import Interface
 from gustafsson.lib.dobot import Dobot
 
 
@@ -142,6 +142,39 @@ class Digidobot:
         self.bot.follow_path(path)
         self.pen_ready(False)
 
+    # todo - this doesnt work LOW
+    def stave(self):
+        centre = self.bot.get_pose()
+        [x, y, z, r] = centre[0:4]
+        for line in range(5):
+            self.pen_ready(True)
+            self.bot.move_to_relative(-10, 0, 0, 0)
+            self.pen_ready(False)
+            y += 2
+            self.bot.move_to(x, y, z, r)
+
+    # todo - this is tricky. Needed?
+    def letters(self, letter: str):
+        """draws a musical letter such as m, p, f.
+        anchor point is far left"""
+        self.pen_ready(True)
+        [x, y, z, r] = self.bot.get_pose()[0:4]
+        if letter == "m":
+            self.bot.move_to_relative(-2, 0, 0, 0)
+            self.interface.set_arc_command([x + 1, y, z, r], [x + 1, y + 1, z, r])
+            self.bot.move_to_relative(2, 0, 0, 0)
+            self.bot.move_to_relative(-2, 0, 0, 0)
+            [x, y, z, r] = self.bot.get_pose()[0:4]
+            self.interface.set_arc_command([x + 1, y, z, r], [x + 1, y + 1, z, r])
+        elif letter == "p":
+            pass
+        elif letter == "f":
+            pass
+        self.pen_ready(False)
+
     def reset_errors(self):
         # self.interface.get_alarms_state()
         self.interface.clear_alarms_state()
+
+    def close(self):
+        self.interface.close()

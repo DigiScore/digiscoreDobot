@@ -28,6 +28,9 @@ class Interface:
     def connected(self):
         return self.serial.isOpen()
 
+    def close(self):
+        self.serial.close()
+
     def get_device_serial_number(self):
         request = Message([0xAA, 0xAA], 2, 0, False, False, [], direction='out')
         return self.send(request)

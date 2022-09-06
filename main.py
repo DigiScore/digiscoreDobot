@@ -1,6 +1,22 @@
-from digiDobot import Digidobot
+from nebula.new_nebula import NebulaDataEngine
 
-digibot = Digidobot()
+
+
+dict = NebulaDataEngine()
+
+dict.random_dict_fill()
+
+
+
+# from digiDobot import Digidobot
+#
+# digibot = Digidobot()
+#
+# digibot.stave()
+
+# digibot.letters("m")
+
+
 
 # a = digibot.interface.get_alarms_state()
 # print(a)
@@ -19,10 +35,10 @@ digibot = Digidobot()
 
 # digibot.home()
 
-digibot.squiggle([(10, 50, -50),
-                  (20, 20, 20),
-                  (-25, -10, 40)
-                  ])
+# digibot.squiggle([(10, 50, -50),
+#                   (20, 20, 20),
+#                   (-25, -10, 40)
+#                   ])
 
 # digibot.home()
 #
@@ -110,4 +126,4 @@ digibot.squiggle([(10, 50, -50),
 # device.slide_to(x, y, z, r, wait=True)
 # device.pose()
 #
-# device.close()
+# digibot.close()
