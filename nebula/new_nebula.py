@@ -23,9 +23,9 @@ import numpy as np
 from time import sleep
 
 # import Nebula modules
-from ai_factory import AIFactory
-from affect import Affect
-from nebula_dataclass import NebulaDataClass
+from nebula.ai_factory import AIFactory
+from nebula.affect import Affect
+from nebula.nebula_dataclass import NebulaDataClass
 
 class Nebula:
     """Nebula is the core "director" of an AI factory.
@@ -58,9 +58,6 @@ class Nebula:
         self.rhythm_rate = 1
         self.affect_listen = 0
 
-        # logging on/off switches
-        self.master_logging = False
-
         # build the dataclass and fill with random number
         self.datadict = NebulaDataClass()
         print(f'Data dict initial values are = {self.datadict}')
@@ -68,11 +65,17 @@ class Nebula:
         # Build the AI factory and pass it the data dict
         self.AI_factory = AIFactory(self.datadict, speed)
 
+        # Start affect listener
+        self.affect = Affect(self.datadict)
+        self.emission_list = self.affect.emission_list
+
     def director(self):
-        """Starts the threads that gets the data rolling."""
+        """Starts the server/ AI threads
+         and gets the data rolling."""
+        print('Starting the Nebula Director')
         # declares all threads
         t1 = Thread(target=self.AI_factory.make_data)
-        t2 = Thread(target=self.Affect.affect)
+        t2 = Thread(target=self.affect.listener)
 
         # assigns them a daemon
         t1.daemon = True
@@ -81,8 +84,34 @@ class Nebula:
         t1.start()
         t2.start()
 
+    #################################
+    #
+    # High Level I/O for the client
+    # will generally be used in a server thread
+    #
+    #################################
+
+    def user_emission(self):
+        """High-level  # This list is highest level comms back to client """
+        return self.emission_list
+
+    def user_input(self, user_input_value: float):
+        """High-level input from client usually from
+        real-time percept.
+        Must be normalised 0.0-1.0"""
+        setattr(self.datadict, 'user_in', user_input_value)
+
+    def terminate(self):
+        self.affect.quit()
+        self.AI_factory.quit()
 
 if __name__ == '__main':
     test = Nebula()
     test.director()
+    if len(test.emission_list) > 0:
+        emission_val = test.emission_list.pop()
+        print(emission_val)
+    else:
+        sleep(0.1)
+        test.user_input(random())
 

@@ -1,11 +1,13 @@
 from dataclasses import dataclass, fields
 from random import random, randrange
 from threading import Thread
+# install python modules
 import tensorflow as tf
 import numpy as np
 from time import sleep
 
-from nebula_dataclass import NebulaDataClass
+# install Nebula modules
+from nebula.nebula_dataclass import NebulaDataClass
 
 
 class AIFactory:
@@ -15,7 +17,7 @@ class AIFactory:
                  datadict: NebulaDataClass,
                  speed: float = 1
                  ):
-
+        print('Building the AI Factory')
         # todo - build as a class where user only inputs the list of nets required
 
         """Builds the individual neural nets that constitute the AI factory.
@@ -29,15 +31,15 @@ class AIFactory:
 
         # instantiate nets as objects and make  models
         print('MoveRNN initialization')
-        self.move_net = tf.keras.models.load_model('models/EMR-full-sept-2021_RNN_skeleton_data.nose.x.h5')
+        self.move_net = tf.keras.models.load_model('nebula/models/EMR-full-sept-2021_RNN_skeleton_data.nose.x.h5')
         print('AffectRNN initialization')
-        self.affect_net = tf.keras.models.load_model('models/EMR-full-sept-2021_RNN_bitalino.h5')
+        self.affect_net = tf.keras.models.load_model('nebula/models/EMR-full-sept-2021_RNN_bitalino.h5')
         print('MoveAffectCONV2 initialization')
-        self.move_affect_net = tf.keras.models.load_model('models/EMR-full-sept-2021_conv2D_move-affect.h5')
+        self.move_affect_net = tf.keras.models.load_model('nebula/models/EMR-full-sept-2021_conv2D_move-affect.h5')
         print('AffectMoveCONV2 initialization')
-        self.affect_move_net = tf.keras.models.load_model('models/EMR-full-sept-2021_conv2D_affect-move.h5')
+        self.affect_move_net = tf.keras.models.load_model('nebula/models/EMR-full-sept-2021_conv2D_affect-move.h5')
         print('MoveAffectCONV2 initialization')
-        self.affect_perception = tf.keras.models.load_model('models/EMR-full-sept-2021_conv2D_move-affect.h5')
+        self.affect_perception = tf.keras.models.load_model('nebula/models/EMR-full-sept-2021_conv2D_move-affect.h5')
 
         # name list for nets that align to factory above
         self.netnames = ['move_rnn',
@@ -48,15 +50,6 @@ class AIFactory:
                          'master_output']  # input for self-awareness
 
         self.net_patch_board = 0
-
-    def random_dict_fill(self):
-        """Fills the working dataclass with random values. Generally called when
-        affect energy is highest"""
-        for field in fields(self.datadict):
-            # print(field.name)
-            rnd = random()
-            setattr(self.datadict, field.name, rnd)
-        print(f'Data dict new random values are = {self.datadict}')
 
     def make_data(self):
         """Makes a prediction for a given net and defined input var.
@@ -126,14 +119,15 @@ class AIFactory:
     def put_pred(self, which_dict, pred):
         # save full output list to master output field
         out_pred_val = pred[0]
-        setattr(self.datadict, 'master_output', out_pred_val)
-        print(f"master move output ==  {out_pred_val}")
+        # setattr(self.datadict, 'master_output', out_pred_val)
+        # print(f"master move output ==  {out_pred_val}")
 
         # get random variable and save to data dict
         individual_val = out_pred_val[randrange(4)]
         setattr(self.datadict, self.netnames[which_dict], individual_val)
 
-
+    def quit(self):
+        self.running = False
 
 if __name__ == "__main__":
     test_data_dict = NebulaDataClass()

@@ -30,13 +30,13 @@ class NebulaDataClass:
     rnd_poetry: float = random()
     """Random stream to spice things up"""
 
-    # affect_net: float = random()
-    # """Net"""
+    affect_net: float = random()
+    """Output from affect module"""
 
     self_awareness: float = random()
     """Net that has some self awareness - ???"""
 
-    affect_decision: float = random()
+    affect_decision: str = " "
     """Current stream chosen by affect process"""
 
     rhythm_rate: float = 0.1

@@ -1,11 +1,27 @@
-from nebula.new_nebula import NebulaDataEngine
+from nebula.new_nebula import Nebula
+from time import sleep
+from random import random
+
+
+test = Nebula(speed=1)
+
+test.director()
+if len(test.emission_list) > 0:
+    emission_val = test.emission_list.pop()
+    # print(emission_val)
+else:
+    sleep(1)
+    test.user_input(random())
 
 
 
-dict = NebulaDataEngine()
 
-dict.random_dict_fill()
 
+#
+# dict = NebulaDataEngine()
+#
+# dict.random_dict_fill()
+#
 
 
 # from digiDobot import Digidobot
