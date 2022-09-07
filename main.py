@@ -1,7 +1,7 @@
-from nebula.new_nebula import Nebula
+from nebula.nebula import Nebula
 from time import sleep
 from random import random
-
+import pyaudio
 
 test = Nebula(speed=1)
 
@@ -13,7 +13,15 @@ else:
     sleep(1)
     test.user_input(random())
 
-
+# set up mic listening funcs
+CHUNK = 2 ** 11
+RATE = 44100
+p = pyaudio.PyAudio()
+stream = p.open(format=pyaudio.paInt16,
+                          channels=1,
+                          rate=RATE,
+                          input=True,
+                          frames_per_buffer=CHUNK)
 
 
 

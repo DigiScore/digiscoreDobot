@@ -6,7 +6,7 @@ from random import random
 from time import sleep
 
 # install Nebula modules
-from nebula.nebula_dataclass import NebulaDataClass
+from old_nebula.nebula_dataclass import NebulaDataClass
 
 
 class Affect:
