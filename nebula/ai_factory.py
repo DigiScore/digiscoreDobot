@@ -24,7 +24,7 @@ class AIFactory:
         This will need modifying if and when a new AI factory design is implemented.
         NB - the list of netnames will also need updating"""
 
-        self.net_logging = True
+        self.net_logging = False
         self.datadict = datadict
         self.global_speed = speed  # / 10
         self.running = True

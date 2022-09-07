@@ -15,7 +15,7 @@ class Affect:
     skeletal tracking, joystick control.
     By analysing the energy of input this class will
     define which feed of the datadict
-    (produced by the AI actory) to emit back to the client.
+    (produced by the AI factory) to emit back to the client.
     Like a thought train it is affected by the energy of a
     percept, and duration of such listening."""
 

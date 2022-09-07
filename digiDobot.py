@@ -44,16 +44,19 @@ class Digidobot:
         print('Center:', self.centre_pos)
         self.pen_ready(False)
 
-    def move_to(self, new_relative_pos: tuple):
+
+    def move_to(self, new_relative_pos: tuple, wait: bool = True):
         """move the pen head to a relative position
         from current position"""
         self.bot.move_to_relative(new_relative_pos[0],
                                   new_relative_pos[1],
-                                  0,0)
+                                  0, 0,
+                                  wait=wait)
 
     def slide_to(self):
         pass
 
+    # todo - all these functions can be with or without pen draw
     def pen_ready(self, ready_to_draw: bool):
         """moves the drawing pen onto page ready to draw"""
         if ready_to_draw:
@@ -62,7 +65,7 @@ class Digidobot:
             self.bot.move_to_relative(0, 0, 5, 0)
             self.reset_errors()
 
-    def squiggle(self, arc_list: list):
+    def squiggle(self, arc_list: list, queue: bool = True):
         """accepts a list of tuples that define a sequence of
         x, y deltas to create a sequence of arcs that define a squiggle.
         list (circumference point, end point x, end point y):
@@ -74,33 +77,33 @@ class Digidobot:
         for arc in arc_list:
             print(arc)
             circumference, dx, dy = arc[0], arc[1], arc[2]
-            self.interface.set_arc_command([x + circumference, y, z, r], [x + dx, y + dy, z, r])
+            self.interface.set_arc_command([x + circumference, y, z, r], [x + dx, y + dy, z, r], queue=queue)
             x += dx
             y += dy
         self.pen_ready(False)
 
-    def line(self, new_position_relative: tuple):
+    def line(self, new_position_relative: tuple, wait: bool = True):
         """Draws a straight line to coordinates relative to current position.
         """
         self.pen_ready(True)
         x = new_position_relative[0]
         y = new_position_relative[1]
-        self.bot.move_to_relative(x, y, 0, 0)
+        self.bot.move_to_relative(x, y, 0, 0, wait=wait)
         self.pen_ready(False)
 
-    def circle_line(self, circle_size: float, line_end_point_relative: tuple):
+    def circle_line(self, circle_size: float, line_end_point_relative: tuple, wait: bool = True):
         """draws a circle and a line combination.
         Circle size is diameter.
         Line direction is relative to start position of circle"""
-        self.circle(circle_size)
-        self.line(line_end_point_relative)
+        self.circle(circle_size, wait)
+        self.line(line_end_point_relative, wait)
 
-    def circle_arc(self, circle_size: float, arc_list: list):
+    def circle_arc(self, circle_size: float, arc_list: list, wait: bool = True):
         """draws a circle and an arc combination.
         Circle size is radius.
         Line direction is relative to start position of circle"""
-        self.circle(circle_size)
-        self.squiggle(arc_list)
+        self.circle(circle_size, wait)
+        self.squiggle(arc_list, wait)
 
     def home(self):
         """ go to default home position"""
@@ -116,10 +119,10 @@ class Digidobot:
         print(x, y, z, r)
         self.bot.slide_to(x, y, z, r)
 
-    def dot(self):
-        self.circle(0.1)
+    def dot(self, wait: bool = True):
+        self.circle(0.1, wait=wait)
 
-    def circle(self, size: float = 2):
+    def circle(self, size: float = 2, wait: bool = True):
         """draws a circle at the current position.
         Default is 3 pixels diameter.
         Args:
@@ -139,7 +142,7 @@ class Digidobot:
                 path.append([center[0] + x * scale, center[1] + y * scale, center[2]])
             else:
                 path.append([center[0] + x * scale, center[1] + y * scale, center[2] - 5])
-        self.bot.follow_path(path)
+        self.bot.follow_path(path, wait=wait)
         self.pen_ready(False)
 
     # todo - this doesnt work LOW
