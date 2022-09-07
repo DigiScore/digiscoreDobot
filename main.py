@@ -2,16 +2,21 @@ from nebula.nebula import Nebula
 from time import sleep
 from random import random
 import pyaudio
+import numpy as np
+
+from digiDobot import Digidobot
+
+digibot = Digidobot()
 
 test = Nebula(speed=1)
 
 test.director()
-if len(test.emission_list) > 0:
-    emission_val = test.emission_list.pop()
+# if len(test.emission_list) > 0:
+#     emission_val = test.emission_list.pop()
     # print(emission_val)
-else:
-    sleep(1)
-    test.user_input(random())
+# else:
+#     sleep(1)
+#     test.user_input(random())
 
 # set up mic listening funcs
 CHUNK = 2 ** 11
@@ -23,7 +28,48 @@ stream = p.open(format=pyaudio.paInt16,
                           input=True,
                           frames_per_buffer=CHUNK)
 
+def dobot_control(incoming_value):
+    value_int = int(incoming_value * 10)
 
+    if value_int == 1:
+        digibot.circle(50)
+    elif value_int == 2:
+        digibot.squiggle([(10, 50, -50),
+                      (20, 20, 20),
+                      (-25, -10, 40)
+                      ])
+    elif value_int == 3:
+        digibot.move_to((10, -20))
+    elif value_int == 4:
+        digibot.circle_arc(1, [(10, 50, -50)])
+    elif value_int == 5:
+        digibot.dot()
+    elif value_int == 6:
+        digibot.circle_line(2, (-20, 45))
+    elif value_int == 7:
+        digibot.line((-20, 45))
+    elif value_int == 8:
+        digibot.circle(10)
+    else:
+        digibot.move_to((random()*10, random()*10))
+
+while True:
+    data = np.frombuffer(stream.read(CHUNK,
+                                          exception_on_overflow=False),
+                         dtype=np.int16)
+    peak = (np.average(np.abs(data)) * 2) / 20000
+
+    # do stuff with this data
+    if peak > 0.2:
+        bars = "#" * int(50 * peak / 2 ** 16)
+        print("%05d %s" % (peak, bars))
+
+    # share the data
+    test.user_input(peak)
+
+    if len(test.emission_list) > 0:
+        emission_val = test.emission_list.pop()
+        dobot_control(emission_val)
 
 #
 # dict = NebulaDataEngine()
@@ -32,9 +78,7 @@ stream = p.open(format=pyaudio.paInt16,
 #
 
 
-# from digiDobot import Digidobot
-#
-# digibot = Digidobot()
+
 #
 # digibot.stave()
 
@@ -53,30 +97,7 @@ stream = p.open(format=pyaudio.paInt16,
 
 
 
-# digibot.circle(50)
-#
-# digibot.reset_errors()
 
-# digibot.home()
-
-# digibot.squiggle([(10, 50, -50),
-#                   (20, 20, 20),
-#                   (-25, -10, 40)
-#                   ])
-
-# digibot.home()
-#
-# digibot.centre()
-
-# digibot.move_to((10, -20))
-
-# digibot.circle_arc(1, [(10, 50, -50)])
-# digibot.dot()
-
-# digibot.circle_line(2, (-20, 45))
-# digibot.line((-20, 45))
-
-# digibot.circle(10)
 
 
 

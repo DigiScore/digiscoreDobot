@@ -7,7 +7,7 @@ import os
 import math
 
 from serial.tools import list_ports
-from gustafsson.lib.dobot import Dobot
+from dobot_python.lib.dobot import Dobot
 
 
 class Digidobot:

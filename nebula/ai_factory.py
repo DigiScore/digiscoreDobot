@@ -7,7 +7,7 @@ import numpy as np
 from time import sleep
 
 # install Nebula modules
-from old_nebula.nebula_dataclass import NebulaDataClass
+from nebula.nebula_dataclass import NebulaDataClass
 
 
 class AIFactory:

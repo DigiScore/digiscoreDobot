@@ -1,7 +1,7 @@
 import serial
 import threading
 
-from gustafsson.lib.message import Message
+from dobot_python.lib.message import Message
 
 
 class Interface:

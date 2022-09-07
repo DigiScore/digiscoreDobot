@@ -1,4 +1,4 @@
-from gustafsson.lib.parsers import parsers
+from dobot_python.lib.parsers import parsers
 
 
 class Message:
