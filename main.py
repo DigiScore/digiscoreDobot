@@ -1,12 +1,12 @@
 from nebula.nebula import Nebula
 from time import sleep
-from random import random, getrandbits
+from random import random, randrange, getrandbits
 import pyaudio
 import numpy as np
 
 from digiDobot import Digidobot
 
-# digibot = Digidobot()
+digibot = Digidobot()
 
 test = Nebula(speed=1)
 
@@ -38,33 +38,40 @@ def rnd():
 
 def dobot_control(incoming_value):
     value_int = int(incoming_value * 10)
+    if getrandbits(1):
+        draw = True
+    else:
+        draw = False
+
+    print(f'DOBOT input val = {value_int}, drawing? {draw}')
 
     if value_int == 1:
-        digibot.circle(rnd())
+        digibot.circle(rnd(), draw)
     elif value_int == 2:
-        digibot.squiggle([(rnd(), rnd(), rnd()),
-                      (rnd(), rnd(), rnd()),
-                      (rnd(), rnd(), rnd())
-                      ])
+        squiggle_list = []
+        for n in range(randrange(2, 10)):
+            squiggle_list.append((rnd(), rnd(), rnd()))
+        digibot.squiggle(squiggle_list, draw)
     elif value_int == 3:
         digibot.move_to((rnd(), rnd()))
     elif value_int == 4:
-        digibot.circle_arc(1, [(rnd(), rnd(), rnd())])
+        digibot.circle_arc(rnd(), [(rnd(), rnd(), rnd())], draw)
     elif value_int == 5:
         digibot.dot()
     elif value_int == 6:
-        digibot.circle_line(2, (rnd(), rnd()), )
+        digibot.circle_line(rnd(), (rnd(), rnd()), draw)
     elif value_int == 7:
-        digibot.line((rnd(), rnd()))
+        digibot.line((rnd(), rnd()), draw)
     elif value_int == 8:
         digibot.circle(rnd())
     else:
         digibot.move_to((rnd(), rnd()))
 
 
+
 while True:
     data = np.frombuffer(stream.read(CHUNK,
-                                          exception_on_overflow=False),
+                                     exception_on_overflow=False),
                          dtype=np.int16)
     peak = np.average(np.abs(data)) * 2
     # print('peak ============ ', peak)
@@ -85,8 +92,8 @@ while True:
 
     if len(test.emission_list) > 0:
         emission_val = test.emission_list.pop()
-        # dobot_control(emission_val)
-        print(emission_val)
+        dobot_control(emission_val)
+        # print(emission_val)
 
 #
 # dict = NebulaDataEngine()

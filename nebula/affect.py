@@ -32,7 +32,7 @@ class Affect:
                             'self_awareness']
 
         # set running vars
-        self.affect_logging = True
+        self.affect_logging = False
         self.running = True
 
         # own the dataclass
@@ -158,7 +158,6 @@ class Affect:
             self.emission_list.append(incoming_affect_listen)
             print(f'//////////////////                   EMITTING value {incoming_affect_listen}')
         self.old_val = incoming_affect_listen
-
 
     def random_dict_fill(self):
         """Fills the working dataclass with random values. Generally called when
