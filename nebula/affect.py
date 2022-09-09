@@ -4,7 +4,6 @@ from time import time
 from dataclasses import fields
 from random import random
 from time import sleep
-import beepy
 
 # install Nebula modules
 from nebula.nebula_dataclass import NebulaDataClass
@@ -47,7 +46,7 @@ class Affect:
 
     def listener(self):
         """Listens to the realtime incoming signal that is stored in the dataclass ("user_input")
-        and calculates an affectual response based on general bounderies:
+        and calculates an affectual response based on general boundaries:
             HIGH - if input stream is LOUD (0.8+) then emit, smash a random fill and break out to Daddy cycle...
             MEDIUM - if input energy is 0.3-0.8 then emit, a jump out of child loop
             LOW - nothing happens, continues with cycles
@@ -65,23 +64,20 @@ class Affect:
                 print('\t\t\t\t\t\t\t\t=========AFFECT - Daddy cycle started ===========')
                 print(f"                 interrupt_listener: started! Duration =  {master_cycle} seconds")
 
-            # refill the dicts
-            self.random_dict_fill()
-
             # 2. child cycle: waiting for interrupt  from master clock
             while time() < loop_end:
-                if self.affect_logging:
-                    print('\t\t\t\t\t\t\t\t=========Hello - child cycle 1 started ===========')
-
-                # if a major break out then go to Daddy cycle
+                # if a major break out then go to Daddy cycle and restart
                 if not self.interrupt_bang:
                     break
+
+                if self.affect_logging:
+                    print('\t\t\t\t\t\t\t\t=========Hello - child cycle 1 started ===========')
 
                 # randomly pick an input stream for this cycle
                 # either user_in, random, net generation or self-awareness
                 rnd = randrange(4)
                 self.rnd_stream = self.affectnames[rnd]
-                setattr(self.datadict, 'affect_decision', rnd) #self.rnd_stream)
+                setattr(self.datadict, 'affect_decision', self.rnd_stream)
                 if self.affect_logging:
                     print(f'Random stream choice = {self.rnd_stream}')
 
@@ -90,29 +86,37 @@ class Affect:
                 if self.affect_logging:
                     print('end time = ', end_time)
 
-                # baby cycle 2 - own time loops
+                # 3. baby cycle - own time loops
                 while time() < end_time:
-                    # get current mic level
-                    peak = getattr(self.datadict, "user_in")
-                    print('mic level = ', peak)
-
                     if self.affect_logging:
                         print('\t\t\t\t\t\t\t\t=========Hello - baby cycle 2 ===========')
 
-                    # go get the current value from dict
+                    # make the master output the current value of the affect stream
+                    # 1. go get the current value from dict
                     affect_listen = getattr(self.datadict, self.rnd_stream)
                     if self.affect_logging:
                         print(f'Affect stream current input value from {self.rnd_stream} == {affect_listen}')
 
-                    # make the master output the current value of the affect stream
+                    # 2. send to Master Output
                     setattr(self.datadict, 'master_output', affect_listen)
                     if self.affect_logging:
                         print(f'\t\t ==============  master move output = {affect_listen}')
 
-                    # emit to the client at various points in the affect cycle
+                    # 3. emit to the client at various points in the affect cycle
                     self.emitter(affect_listen)
 
-                    # calc affect on behaviour
+                    ###############################################
+                    #
+                    # test realtime input against the affect matrix
+                    # behave as required
+                    #
+                    ###############################################
+
+                    # 1. get current mic level
+                    peak = getattr(self.datadict, "user_in")
+                    print('testing current mic level for affect = ', peak)
+
+                    # 2. calc affect on behaviour
                     # LOUD
                     # if input stream is LOUD then smash a random fill and break out to Daddy cycle...
                     if peak > 0.8:
@@ -122,13 +126,8 @@ class Affect:
                         # A - refill dict with random
                         self.random_dict_fill()
 
-                        # emit at various points in the affect cycle
-                        # self.emitter(affect_listen)
-
                         # B - jumps out of this loop into daddy
                         self.interrupt_bang = False
-                        if self.affect_logging:
-                            print('interrupt bang = ', self.interrupt_bang)
 
                         # C break out of this loop, and next (cos of flag)
                         break
@@ -138,18 +137,15 @@ class Affect:
                     elif 0.3 < peak < 0.8:
                         if self.affect_logging:
                             print('interrupt MIDDLE -----------')
-                            print('interrupt bang = ', self.interrupt_bang)
 
-                        # emit at various points in the affect cycle
-                        # self.emitter(affect_listen)
-
-                        # jumps out of current local loop, but not main one
+                        # A. jumps out of current local loop, but not main one
                         break
 
                     # LOW
                     # nothing happens here
                     elif peak <= 0.3:
-                        pass
+                        if self.affect_logging:
+                            print('interrupt LOW ----------- no action')
 
                     # get current rhythm_rate from datadict
                     rhythm_rate = getattr(self.datadict, 'rhythm_rate')
@@ -158,11 +154,9 @@ class Affect:
                     sleep(rhythm_rate)
 
     def emitter(self, incoming_affect_listen):
-        print('RAW EMISSION')
         if incoming_affect_listen != self.old_val:
             self.emission_list.append(incoming_affect_listen)
             print(f'//////////////////                   EMITTING value {incoming_affect_listen}')
-            beepy.beep(sound="ping")
         self.old_val = incoming_affect_listen
 
 
