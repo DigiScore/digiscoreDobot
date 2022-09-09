@@ -6,7 +6,7 @@ import numpy as np
 
 from digiDobot import Digidobot
 
-digibot = Digidobot()
+# digibot = Digidobot()
 
 test = Nebula(speed=1)
 
@@ -67,20 +67,26 @@ while True:
                                           exception_on_overflow=False),
                          dtype=np.int16)
     peak = np.average(np.abs(data)) * 2
-    print('peak ============ ', peak)
+    # print('peak ============ ', peak)
 
     # do stuff with this data
-    if peak > 2000:
-        bars = "#" * int(50 * peak / 2 ** 16)
-        print("%05d %s" % (peak, bars))
+    # if peak > 2000:
+    #     bars = "#" * int(50 * peak / 2 ** 16)
+    #     print("%05d %s" % (peak, bars))
 
     # share the data
-    normalised_peak = peak / 2000
-    test.user_input(peak)
+    # new_value = ( (old_value - old_min) / (old_max - old_min) ) * (new_max - new_min) + new_min
+    normalised_peak = ((peak - 0) / (20000 - 0)) * (1 - 0) + 0
+    if normalised_peak > 1.0:
+        normalised_peak = 1.0
+
+    # print('normalised peak === ', normalised_peak)
+    test.user_input(normalised_peak)
 
     if len(test.emission_list) > 0:
         emission_val = test.emission_list.pop()
-        dobot_control(emission_val)
+        # dobot_control(emission_val)
+        print(emission_val)
 
 #
 # dict = NebulaDataEngine()

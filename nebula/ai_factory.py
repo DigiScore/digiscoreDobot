@@ -66,7 +66,7 @@ class AIFactory:
             # calc rhythmic intensity based on self-awareness factor & global speed
             intensity = getattr(self.datadict, 'self_awareness')
             # print('////////////////////////   intensity = ', intensity)
-            rhythm_rate = (rhythm_rate * intensity) / self.global_speed  # self.rhythm_rate / self.global_speed
+            rhythm_rate = (rhythm_rate * intensity) * self.global_speed  # self.rhythm_rate / self.global_speed
             # self.datadict['rhythm_rate'] = rhythm_rate
             setattr(self.datadict, 'rhythm_rate', rhythm_rate)
 
@@ -84,7 +84,7 @@ class AIFactory:
             pred4 = self.affect_move_net.predict(in_val4)
 
             # special case for self awareness stream
-            self_aware_input = self.get_in_val(4)  # main movement as input
+            self_aware_input = self.get_in_val(5)  # main movement as input
             self_aware_pred = self.affect_perception.predict(self_aware_input)
 
             # emits a stream of random poetry
@@ -110,7 +110,7 @@ class AIFactory:
     def get_in_val(self, which_dict):
         # get the current value and reshape ready for input for prediction
         input_val = getattr(self.datadict, self.netnames[which_dict])
-        print("input val", input_val)
+        # print("input val", input_val)
         input_val = np.reshape(input_val, (1, 1, 1))
         input_val = tf.convert_to_tensor(input_val, np.float32)
         return input_val
