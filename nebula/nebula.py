@@ -68,6 +68,7 @@ class Nebula:
         # Start affect listener
         self.affect = Affect(self.datadict)
         self.emission_list = self.affect.emission_list
+        # self.live_emission_data = self.affect.live_emission_data
 
     def director(self):
         """Starts the server/ AI threads
@@ -91,9 +92,13 @@ class Nebula:
     #
     #################################
 
-    def user_emission(self):
-        """High-level  # This list is highest level comms back to client """
+    def user_emission_list(self):
+        """This list is highest level comms back to client """
         return self.emission_list
+
+    def user_live_emission_data(self):
+        """Returns the current value of the AI factory master output"""
+        return self.affect.live_emission_data
 
     def user_input(self, user_input_value: float):
         """High-level input from client usually from

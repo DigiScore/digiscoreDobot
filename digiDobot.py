@@ -26,6 +26,9 @@ class Digidobot:
         self.interface = self.bot.interface
         print('Bot status:', 'connected' if self.bot.connected() else 'not connected')
 
+        # setup a client incoming command list
+        self.incoming_command_list = []
+
         # reset any lingering errors
         # todo - this doesnt
         self.reset_errors()
@@ -52,8 +55,13 @@ class Digidobot:
                                   0, 0,
                                   wait=wait)
 
-    def slide_to(self):
-        pass
+    def slide_to(self, new_relative_pos: tuple, wait: bool = True):
+        """Slide to a relative coordinate, 
+        shortest possible path"""
+        self.bot.slide_to_relative(new_relative_pos[0],
+                                   new_relative_pos[1],
+                                   0, 0,
+                                   wait=wait)
 
     # todo - all these functions can be with or without pen draw
     def pen_ready(self, ready_to_draw: bool):

@@ -40,6 +40,7 @@ class Affect:
 
         # Emission list is the highest level comms back to client
         self.emission_list = []
+        self.live_emission_data = 0.0
 
         # little val for emission control avoiding repeated vals (see below)
         self.old_val = 0
@@ -114,7 +115,8 @@ class Affect:
 
                     # 1. get current mic level
                     peak = getattr(self.datadict, "user_in")
-                    print('testing current mic level for affect = ', peak)
+                    if self.affect_logging:
+                        print('testing current mic level for affect = ', peak)
 
                     # 2. calc affect on behaviour
                     # LOUD
@@ -156,7 +158,9 @@ class Affect:
     def emitter(self, incoming_affect_listen):
         if incoming_affect_listen != self.old_val:
             self.emission_list.append(incoming_affect_listen)
-            print(f'//////////////////                   EMITTING value {incoming_affect_listen}')
+            self.live_emission_data = incoming_affect_listen
+            if self.affect_logging:
+                print(f'//////////////////                   EMITTING value {incoming_affect_listen}')
         self.old_val = incoming_affect_listen
 
     def random_dict_fill(self):
