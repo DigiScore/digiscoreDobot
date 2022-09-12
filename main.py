@@ -9,25 +9,12 @@ from digiDobot import Digidobot
 
 class DrawBot:
     def __init__(self):
-
-        self.digibot = Digidobot()
-
-        self.nebula = Nebula(speed=1)
-
         # start Nebula
+        self.nebula = Nebula(speed=1)
         self.nebula.director()
 
-        # get live emission from Nebula (not list)
-        # self.nebula_emission_val = self.nebula.live_emission_data
-        self.command_list = ["circle",
-                        "squiggle",
-                        "move to relative",
-                        "circle arc",
-                        "dot",
-                        "circle line",
-                        "line",
-                        "circle",
-                        "slide to relative"]
+        # start dobot
+        self.digibot = Digidobot()
 
         # set up mic listening funcs
         self.CHUNK = 2 ** 11
@@ -39,16 +26,18 @@ class DrawBot:
                                   input=True,
                                   frames_per_buffer=self.CHUNK)
 
-    def director(self):
         # start the bot listening and drawing
         self.running = True
         self.old_value = 0
+
         listener_thread = Thread(target=self.director)
         dobot_thread = Thread(target=self.dobot_control)
         listener_thread.start()
         dobot_thread.start()
         listener_thread.join()
 
+
+    def director(self):
         print("Starting mic listening stream & thread")
         while self.running:
             # get amplitude from mic input
@@ -96,6 +85,16 @@ class DrawBot:
                 sleep(1)
 
     def dobot_commands(self, incoming_command):
+        command_list = ["circle",
+                             "squiggle",
+                             "move to relative",
+                             "circle arc",
+                             "dot",
+                             "circle line",
+                             "line",
+                             "circle",
+                             "slide to relative",
+                             "slide to relative"]
 
         # randomly draw or move
         if getrandbits(1):
@@ -109,7 +108,7 @@ class DrawBot:
         else:
             wait = False
 
-        print(f'{incoming_command}: DOBOT draw command = {self.command_list[incoming_command]}, drawing={draw}, wait={wait}')
+        print(f'{incoming_command}: DOBOT draw command = {command_list[incoming_command]}, drawing={draw}, wait={wait}')
 
         if incoming_command == 1:
             self.digibot.circle(self.rnd(), draw, wait)
@@ -134,11 +133,6 @@ class DrawBot:
             self.digibot.slide_to((self.rnd(), self.rnd()), wait)
 
 
-
-
 if __name__ == "__main__":
     drawbot = DrawBot()
-    # drawbot.director()
 
-    for cmd in range(9):
-        drawbot.dobot_commands(cmd)

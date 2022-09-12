@@ -9,6 +9,125 @@ import math
 from serial.tools import list_ports
 from dobot_python.lib.dobot import Dobot
 
+alarm_dict = {
+            0x00: 'reset occurred',
+            0x01: 'undefined instruction',
+            0x02: 'file system error',
+            0x03: 'communications error between MCU and FPGA',
+            0x04: 'angle sensor error',
+
+            0x10: 'plan: pose is abnormal',
+            0x11: 'plan: pose is out of workspace',
+            0x12: 'plan: joint limit',
+            0x13: 'plan: repetitive points',
+            0x14: 'plan: arc input parameter',
+            0x15: 'plan: jump parameter',
+
+            0x20: 'motion: kinematic singularity',
+            0x21: 'motion: out of workspace',
+            0x22: 'motion: inverse limit',
+
+            0x30: 'axis 1 overspeed',
+            0x31: 'axis 2 overspeed',
+            0x32: 'axis 3 overspeed',
+            0x33: 'axis 4 overspeed',
+
+            0x40: 'axis 1 positive limit',
+            0x41: 'axis 1 negative limit',
+            0x42: 'axis 2 positive limit',
+            0x43: 'axis 2 negative limit',
+            0x44: 'axis 3 positive limit',
+            0x45: 'axis 3 negative limit',
+            0x46: 'axis 4 positive limit',
+            0x47: 'axis 4 negative limit',
+
+            0x50: 'axis 1 lost steps',
+            0x51: 'axis 2 lost steps',
+            0x52: 'axis 3 lost steps',
+            0x53: 'axis 4 lost steps',
+
+
+            0x60: 'OTHER_AXIS1_DRV_ALARM',
+            0x61: 'OTHER_AXIS1_OVERFLOW',
+            0x62: 'OTHER_AXIS1_FOLLOW',
+            0x63: 'OTHER_AXIS2_DRV_ALARM',
+            0x64: 'OTHER_AXIS2_OVERFLOW',
+            0x65: 'OTHER_AXIS2_FOLLOW',
+            0x66: 'OTHER_AXIS3_DRV_ALARM',
+            0x67: 'OTHER_AXIS3_OVERFLOW',
+            0x68: 'OTHER_AXIS3_FOLLOW',
+            0x69: 'OTHER_AXIS4_DRV_ALARM',
+            0x6A: 'OTHER_AXIS4_OVERFLOW',
+            0x6B: 'OTHER_AXIS4_FOLLOW',
+
+            0x70: 'MOTOR_REAR_ENCODER',
+            0x71: 'MOTOR_REAR_TEMPERATURE_HIGH',
+            0x72: 'MOTOR_REAR_TEMPERATURE_LOW',
+            0x73: 'MOTOR_REAR_LOCK_CURRENT',
+            0x74: 'MOTOR_REAR_BUSV_HIGH',
+            0x75: 'MOTOR_REAR_BUSV_LOW',
+            0x76: 'MOTOR_REAR_OVERHEAT',
+            0x77: 'MOTOR_REAR_RUNAWAY',
+            0x78: 'MOTOR_REAR_BATTERY_LOW',
+            0x79: 'MOTOR_REAR_PHASE_SHORT',
+            0x7A: 'MOTOR_REAR_PHASE_WRONG',
+            0x7B: 'MOTOR_REAR_LOST_SPEED',
+            0x7C: 'MOTOR_REAR_NOT_STANDARDIZE',
+            0x7D: 'ENCODER_REAR_NOT_STANDARDIZE',
+            0x7E: 'MOTOR_REAR_CAN_BROKE',
+
+            0x80: 'MOTOR_FRONT_ENCODER',
+            0x81: 'MOTOR_FRONT_TEMPERATURE_HIGH',
+            0x82: 'MOTOR_FRONT_TEMPERATURE_LOW',
+            0x83: 'MOTOR_FRONT_LOCK_CURRENT',
+            0x84: 'MOTOR_FRONT_BUSV_HIGH',
+            0x85: 'MOTOR_FRONT_BUSV_LOW',
+            0x86: 'MOTOR_FRONT_OVERHEAT',
+            0x87: 'MOTOR_FRONT_RUNAWAY',
+            0x88: 'MOTOR_FRONT_BATTERY_LOW',
+            0x89: 'MOTOR_FRONT_PHASE_SHORT',
+            0x8A: 'MOTOR_FRONT_PHASE_WRONG',
+            0x8B: 'MOTOR_FRONT_LOST_SPEED',
+            0x8C: 'MOTOR_FRONT_NOT_STANDARDIZE',
+            0x8D: 'ENCODER_FRONT_NOT_STANDARDIZE',
+            0x8E: 'MOTOR_FRONT_CAN_BROKE',
+
+            0x90: 'MOTOR_Z_ENCODER',
+            0x91: 'MOTOR_Z_TEMPERATURE_HIGH',
+            0x92: 'MOTOR_Z_TEMPERATURE_LOW',
+            0x93: 'MOTOR_Z_LOCK_CURRENT',
+            0x94: 'MOTOR_Z_BUSV_HIGH',
+            0x95: 'MOTOR_Z_BUSV_LOW',
+            0x96: 'MOTOR_Z_OVERHEAT',
+            0x97: 'MOTOR_Z_RUNAWAY',
+            0x98: 'MOTOR_Z_BATTERY_LOW',
+            0x99: 'MOTOR_Z_PHASE_SHORT',
+            0x9A: 'MOTOR_Z_PHASE_WRONG',
+            0x9B: 'MOTOR_Z_LOST_SPEED',
+            0x9C: 'MOTOR_Z_NOT_STANDARDIZE',
+            0x9D: 'ENCODER_Z_NOT_STANDARDIZE',
+            0x9E: 'MOTOR_Z_CAN_BROKE',
+
+            0xA0: 'MOTOR_R_ENCODER',
+            0xA1: 'MOTOR_R_TEMPERATURE_HIGH',
+            0xA2: 'MOTOR_R_TEMPERATURE_LOW',
+            0xA3: 'MOTOR_R_LOCK_CURRENT',
+            0xA4: 'MOTOR_R_BUSV_HIGH',
+            0xA5: 'MOTOR_R_BUSV_LOW',
+            0xA6: 'MOTOR_R_OVERHEAT',
+            0xA7: 'MOTOR_R_RUNAWAY',
+            0xA8: 'MOTOR_R_BATTERY_LOW',
+            0xA9: 'MOTOR_R_PHASE_SHORT',
+            0xAA: 'MOTOR_R_PHASE_WRONG',
+            0xAB: 'MOTOR_R_LOST_SPEED',
+            0xAC: 'MOTOR_R_NOT_STANDARDIZE',
+            0xAD: 'ENCODER_R_NOT_STANDARDIZE',
+            0xAE: 'MOTOR_R_CAN_BROKE',
+
+            0xB0: 'MOTOR_ENDIO_IO',
+            0xB1: 'MOTOR_ENDIO_RS485_WRONG',
+            0xB2: 'MOTOR_ENDIO_CAN_BROKE'
+        }
 
 class Digidobot:
 
@@ -212,14 +331,29 @@ class Digidobot:
     #     self.pen_ready(False)
 
     def reset_errors(self):
-        # self.interface.get_alarms_state()
+        alarms = self.interface.get_alarms_state()
+        # print(alarms)
+        self.alarms(alarms)
         self.interface.clear_alarms_state()
+
+    def alarms(self, alarm_response):
+        alarms = []
+        for i, x in enumerate(alarm_response):
+            for j in range(8):
+                if x & (1 << j) > 0:
+                    alarms.append(8 * i + j)
+        for alarm in alarms:
+            try:
+                print('ALARM:', alarm_dict[alarm])
+            except:
+                print('ALARM: not in list')
 
     def close(self):
         self.interface.close()
 
 if __name__ == "__main__":
     digibot = Digidobot()
+    digibot.reset_errors()
     digibot.squiggle([(10, 10, 10),
                      (5, 5, 5)],
                      True,

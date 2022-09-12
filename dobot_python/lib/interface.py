@@ -22,6 +22,7 @@ class Interface:
         self.serial.write(message.package())
         self.serial.flush()
         response = Message.read(self.serial)
+        # print(f"DOBOT RESPONSE: {response.params}")
         self.lock.release()
         return response.params
 
