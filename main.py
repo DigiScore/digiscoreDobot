@@ -34,7 +34,7 @@ class DrawBot:
         dobot_thread = Thread(target=self.dobot_control)
         listener_thread.start()
         dobot_thread.start()
-        listener_thread.join()
+        # listener_thread.join()
 
 
     def director(self):
@@ -45,6 +45,10 @@ class DrawBot:
                                              exception_on_overflow=False),
                                  dtype=np.int16)
             peak = np.average(np.abs(data)) * 2
+
+            if peak > 2000:
+                bars = "#" * int(50 * peak / 2 ** 16)
+                print("%05d %s" % (peak, bars))
 
             # normalise it for range 0.0 - 1.0
             normalised_peak = ((peak - 0) / (20000 - 0)) * (1 - 0) + 0
@@ -66,8 +70,13 @@ class DrawBot:
             posneg = 10
         else:
             posneg = -10
-        return random() * posneg
 
+        # multiplication factor
+        if getrandbits(1):
+            multiplication_factor = randrange(1, 5)
+        else:
+            multiplication_factor = 0
+        return (random() * posneg) * multiplication_factor
 
     def dobot_control(self):
         print("Started dobot control thread")
