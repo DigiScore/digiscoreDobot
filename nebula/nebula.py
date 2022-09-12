@@ -67,7 +67,7 @@ class Nebula:
 
         # Start affect listener
         self.affect = Affect(self.datadict)
-        self.emission_list = self.affect.emission_list
+        # self.emission_list = self.affect.emission_list
         # self.live_emission_data = self.affect.live_emission_data
 
     def director(self):

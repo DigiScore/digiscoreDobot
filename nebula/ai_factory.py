@@ -66,7 +66,7 @@ class AIFactory:
             # calc rhythmic intensity based on self-awareness factor & global speed
             intensity = getattr(self.datadict, 'self_awareness')
             # print('////////////////////////   intensity = ', intensity)
-            rhythm_rate = (rhythm_rate * intensity) * self.global_speed  # self.rhythm_rate / self.global_speed
+            rhythm_rate =  rhythm_rate / self.global_speed # (rhythm_rate * intensity) * self.global_speed
             # self.datadict['rhythm_rate'] = rhythm_rate
             setattr(self.datadict, 'rhythm_rate', rhythm_rate)
 

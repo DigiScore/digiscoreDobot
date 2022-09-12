@@ -73,7 +73,7 @@ class DrawBot:
 
         # multiplication factor
         if getrandbits(1):
-            multiplication_factor = randrange(1, 5)
+            multiplication_factor = randrange(1, 2)
         else:
             multiplication_factor = 0
         return (random() * posneg) * multiplication_factor
@@ -115,7 +115,7 @@ class DrawBot:
         if getrandbits(1):
             wait = True
         else:
-            wait = False
+            wait = True
 
         print(f'{incoming_command}: DOBOT draw command = {command_list[incoming_command]}, drawing={draw}, wait={wait}')
 

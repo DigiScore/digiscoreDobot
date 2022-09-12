@@ -39,7 +39,7 @@ class Affect:
         self.datadict = datadict
 
         # Emission list is the highest level comms back to client
-        self.emission_list = []
+        # self.emission_list = []
         self.live_emission_data = 0.0
 
         # little val for emission control avoiding repeated vals (see below)
@@ -157,10 +157,10 @@ class Affect:
 
     def emitter(self, incoming_affect_listen):
         if incoming_affect_listen != self.old_val:
-            self.emission_list.append(incoming_affect_listen)
+            # self.emission_list.append(incoming_affect_listen)
             self.live_emission_data = incoming_affect_listen
-            if self.affect_logging:
-                print(f'//////////////////                   EMITTING value {self.live_emission_data}')
+            # if self.affect_logging:
+            print(f'//////////////////                   EMITTING value {self.live_emission_data}')
         self.old_val = incoming_affect_listen
 
     def random_dict_fill(self):
