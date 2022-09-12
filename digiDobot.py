@@ -44,7 +44,7 @@ class Digidobot:
         input("Press enter to continue...")
 
         self.centre_pos = self.interface.get_pose()
-        print('Center:', self.centre_pos)
+        print(f'Centre position (x, y, z, r): {self.centre_pos[0:4]}, angles = {self.centre_pos[4:]}')
         self.pen_ready(False)
 
     def move_to(self, new_relative_pos: tuple, wait: bool = True):
@@ -66,11 +66,21 @@ class Digidobot:
     # todo - all these functions can be with or without pen draw
     def pen_ready(self, ready_to_draw: bool):
         """moves the drawing pen onto page ready to draw"""
+        current_position = self.interface.get_pose()
+        print(f'current position = {current_position}')
+        x, y, r = current_position[0], current_position[1], current_position[3]
+        draw_z = self.centre_pos[2]
         if ready_to_draw:
-            self.bot.move_to_relative(0, 0, -5, 0)
+            print(f"Ready to draw x:{x}, y:{y}, z:{draw_z}")
+            # self.bot.move_to_relative(0, 0, -5, 0)
+            self.bot.move_to(x, y, draw_z, r)
         else:
-            self.bot.move_to_relative(0, 0, 5, 0)
-            self.reset_errors()
+            print(f"Ready to move x:{x}, y:{y}, z:{draw_z + 5}")
+            # self.bot.move_to_relative(0, 0, 5, 0)
+            self.bot.move_to(x, y, draw_z + 5, r)
+
+        self.reset_errors()
+
 
     def squiggle(self, arc_list: list,
                  drawing: bool = True,
@@ -85,7 +95,7 @@ class Digidobot:
             self.pen_ready(True)
         [x, y, z, r] = self.interface.get_pose()[0:4]
         for arc in arc_list:
-            print(arc)
+            # print(arc)
             circumference, dx, dy = arc[0], arc[1], arc[2]
             self.interface.set_arc_command([x + circumference, y, z, r], [x + dx, y + dy, z, r], queue=queue)
             x += dx
@@ -207,3 +217,11 @@ class Digidobot:
 
     def close(self):
         self.interface.close()
+
+if __name__ == "__main__":
+    digibot = Digidobot()
+    digibot.squiggle([(10, 10, 10),
+                     (5, 5, 5)],
+                     True,
+                     True)
+    print(digibot.interface.get_pose())

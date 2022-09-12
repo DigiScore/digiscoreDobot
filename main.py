@@ -19,6 +19,15 @@ class DrawBot:
 
         # get live emission from Nebula (not list)
         # self.nebula_emission_val = self.nebula.live_emission_data
+        self.command_list = ["circle",
+                        "squiggle",
+                        "move to relative",
+                        "circle arc",
+                        "dot",
+                        "circle line",
+                        "line",
+                        "circle",
+                        "slide to relative"]
 
         # set up mic listening funcs
         self.CHUNK = 2 ** 11
@@ -30,6 +39,7 @@ class DrawBot:
                                   input=True,
                                   frames_per_buffer=self.CHUNK)
 
+    def director(self):
         # start the bot listening and drawing
         self.running = True
         self.old_value = 0
@@ -39,7 +49,6 @@ class DrawBot:
         dobot_thread.start()
         listener_thread.join()
 
-    def director(self):
         print("Starting mic listening stream & thread")
         while self.running:
             # get amplitude from mic input
@@ -70,66 +79,66 @@ class DrawBot:
             posneg = -10
         return random() * posneg
 
+
     def dobot_control(self):
         print("Started dobot control thread")
-        command_list = ["circle",
-                        "squiggle",
-                        "move to relative",
-                        "circle arc",
-                        "dot",
-                        "circle line",
-                        "line",
-                        "circle",
-                        "slide to relative"]
 
         while self.running:
             # get current nebula emission value
-            live_emission_data = self.nebula.user_live_emission_data
+            live_emission_data = self.nebula.user_live_emission_data()
             print(f"emission value = {live_emission_data}")
             if live_emission_data != self.old_value:
                 # multiply by 10 for local logic
                 value_int = int(live_emission_data * 10)
-
-                # randomly draw or move
-                if getrandbits(1):
-                    draw = True
-                else:
-                    draw = False
-
-                # randomly wait or not
-                if getrandbits(1):
-                    wait = True
-                else:
-                    wait = False
-
-                print(f'DOBOT input val = {command_list[value_int]}, drawing? = {draw}, wait = {wait}')
-
-                if value_int == 1:
-                    self.digibot.circle(self.rnd(), draw, wait)
-                elif value_int == 2:
-                    squiggle_list = []
-                    for n in range(randrange(2, 10)):
-                        squiggle_list.append((self.rnd(), self.rnd(), self.rnd()))
-                    self.digibot.squiggle(squiggle_list, draw, wait)
-                elif value_int == 3:
-                    self.digibot.move_to((self.rnd(), self.rnd()))
-                elif value_int == 4:
-                    self.digibot.circle_arc(self.rnd(), [(self.rnd(), self.rnd(), self.rnd())], draw, wait)
-                elif value_int == 5:
-                    self.digibot.dot()
-                elif value_int == 6:
-                    self.digibot.circle_line(self.rnd(), (self.rnd(), self.rnd()), draw, wait)
-                elif value_int == 7:
-                    self.digibot.line((self.rnd(), self.rnd()), draw, wait)
-                elif value_int == 8:
-                    self.digibot.circle(self.rnd(), wait)
-                else:
-                    self.digibot.move_to((self.rnd(), self.rnd()), wait)
+                self.dobot_commands(value_int)
 
             else:
                 sleep(1)
 
+    def dobot_commands(self, incoming_command):
+
+        # randomly draw or move
+        if getrandbits(1):
+            draw = True
+        else:
+            draw = False
+
+        # randomly wait or not
+        if getrandbits(1):
+            wait = True
+        else:
+            wait = False
+
+        print(f'{incoming_command}: DOBOT draw command = {self.command_list[incoming_command]}, drawing={draw}, wait={wait}')
+
+        if incoming_command == 1:
+            self.digibot.circle(self.rnd(), draw, wait)
+        elif incoming_command == 2:
+            squiggle_list = []
+            for n in range(randrange(2, 10)):
+                squiggle_list.append((self.rnd(), self.rnd(), self.rnd()))
+            self.digibot.squiggle(squiggle_list, draw, wait)
+        elif incoming_command == 3:
+            self.digibot.move_to((self.rnd(), self.rnd()))
+        elif incoming_command == 4:
+            self.digibot.circle_arc(self.rnd(), [(self.rnd(), self.rnd(), self.rnd())], draw, wait)
+        elif incoming_command == 5:
+            self.digibot.dot()
+        elif incoming_command == 6:
+            self.digibot.circle_line(self.rnd(), (self.rnd(), self.rnd()), draw, wait)
+        elif incoming_command == 7:
+            self.digibot.line((self.rnd(), self.rnd()), draw, wait)
+        elif incoming_command == 8:
+            self.digibot.circle(self.rnd(), wait)
+        else:
+            self.digibot.slide_to((self.rnd(), self.rnd()), wait)
+
+
+
 
 if __name__ == "__main__":
-    DrawBot()
+    drawbot = DrawBot()
+    # drawbot.director()
 
+    for cmd in range(9):
+        drawbot.dobot_commands(cmd)

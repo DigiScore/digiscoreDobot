@@ -1,4 +1,9 @@
 from time import sleep
+import sys
+import os
+import math
+
+from serial.tools import list_ports
 
 from dobot_python.lib.interface import Interface
 
@@ -29,87 +34,45 @@ class Dobot:
     def get_pose(self):
         return self.interface.get_pose()
 
-    def printq(self):
-        pose = self.get_pose()
-        print('q:   ', ' '.join([f'{q:8.1f}' for q in pose[4:]]))
-
-    def printx(self):
-        pose = self.get_pose()
-        print('x:   ', ' '.join([f'{q:8.1f}' for q in pose[:4]]))
-
-    alarm_dict = {
-        0x00: 'reset occurred',
-        0x01: 'undefined instruction',
-        0x02: 'file system error',
-        0x03: 'communications error between MCU and FPGA',
-        0x04: 'angle sensor error',
-
-        0x10: 'plan: pose is abnormal',
-        0x11: 'plan: pose is out of workspace',
-        0x12: 'plan: joint limit',
-        0x13: 'plan: repetitive points',
-        0x14: 'plan: arc input parameter',
-        0x15: 'plan: jump parameter',
-
-        0x20: 'motion: kinematic singularity',
-        0x21: 'motion: out of workspace',
-        0x22: 'motion: inverse limit',
-
-        0x30: 'axis 1 overspeed',
-        0x31: 'axis 2 overspeed',
-        0x32: 'axis 3 overspeed',
-        0x33: 'axis 4 overspeed',
-
-        0x40: 'axis 1 positive limit',
-        0x41: 'axis 1 negative limit',
-        0x42: 'axis 2 positive limit',
-        0x43: 'axis 2 negative limit',
-        0x44: 'axis 3 positive limit',
-        0x45: 'axis 3 negative limit',
-        0x46: 'axis 4 positive limit',
-        0x47: 'axis 4 negative limit',
-
-        0x50: 'axis 1 lost steps',
-        0x51: 'axis 2 lost steps',
-        0x52: 'axis 3 lost steps',
-        0x53: 'axis 4 lost steps',
-    }
-
-    def print_alarms(self, a):
-        alarms = []
-        for i, x in enumerate(a):
-            for j in range(8):
-                if x & (1 << j) > 0:
-                    alarms.append(8 * i + j)
-        for alarm in alarms:
-            print('ALARM:', self.alarm_dict[alarm])
-
     def home(self, wait=True):
         self.interface.set_homing_command(0)
         if wait:
             self.wait()
 
-    # Move to the absolute coordinate, one axis at a time
+    # 2. MOVL_XYZ,
+    #         Linear movement,
+    #         (x,y,z,r)
+    #         is the target point in Cartesian coordinate system
+    #         Move to the absolute coordinate, one axis at a time
     def move_to(self, x, y, z, r, wait=True):
-        self.interface.set_point_to_point_command(3, x, y, z, r)
+        self.interface.set_point_to_point_command(2, x, y, z, r)
         if wait:
             self.wait()
 
-    # Slide to the absolute coordinate, shortest possible path
-    def slide_to(self, x, y, z, r, wait=True):
-        self.interface.set_point_to_point_command(4, x, y, z, r)
+    # 1. MOVJ_XYZ,
+    #         Joint movement,
+    #         (x,y,z,r)
+    #         is the target point in Cartesian coordinate system
+    #         Slide to the absolute coordinate, shortest possible path
+    def slide_to(self, j1, j2, j3, j4, wait=True):
+        self.interface.set_point_to_point_command(1, j1, j2, j3, j4)
         if wait:
             self.wait()
 
-    # Move to the absolute coordinate, one axis at a time
+    # 7. MOVL_INC,Linear movement increment mode, (x,y,z,r)
+    # is the Cartesian coordinate increment in Cartesian coordinate system
     def move_to_relative(self, x, y, z, r, wait=True):
         self.interface.set_point_to_point_command(7, x, y, z, r)
         if wait:
             self.wait()
 
-    # Slide to the relative coordinate, one axis at a time
-    def slide_to_relative(self, x, y, z, r, wait=True):
-        self.interface.set_point_to_point_command(6, x, y, z, r)
+    # 6. MOVJ_INC,
+    #         Joint movement increment mode,
+    #         (x,y,z,r)
+    #         is the angle increment in Joint coordinate system
+    #         Slide joints to the relative coordinate, one axis at a time
+    def slide_to_relative(self, j1, j2, j3, j4, wait=True):
+        self.interface.set_point_to_point_command(6, j1, j2, j3, j4)
         if wait:
             self.wait()
 
@@ -147,3 +110,43 @@ class Dobot:
         self.interface.start_queue()
         if wait:
             self.wait(queue_index)
+
+if __name__ == "__main__":
+    sys.path.insert(0, os.path.abspath('.'))
+
+    # find available ports and locate Dobot (-1)
+    available_ports = list_ports.comports()
+    print(f'available ports: {[x.device for x in available_ports]}')
+    port = available_ports[-1].device
+    testbot = Dobot(port)
+
+    def print_position():
+        pos = testbot.interface.get_pose()
+        print(f'Centre position (x, y, z, r): {pos[0:4]}, angles = {pos[4:]}')
+
+
+    print('locating home')
+    testbot.home()
+
+    print('Unlock the arm and place it on the middle of the paper')
+    input("Press enter to continue...")
+    centre_pos = testbot.interface.get_pose()
+
+    print_position()
+
+    print("moving to relative position x + 10")
+    testbot.move_to_relative(10, 0, 0, 0)
+    print_position()
+
+    print("slide joints to relative position j1 + 10")
+    testbot.slide_to_relative(10, 0, 0, 0)
+    print_position()
+
+    print('move to an absolute cartesian position - original centre')
+    x, y, z, r = centre_pos[0], centre_pos[1], centre_pos[2], centre_pos[3]
+    testbot.move_to(x, y, z, r)
+
+    print('move to an absolute cartesian position - original centre pen up')
+    x, y, z, r = centre_pos[0], centre_pos[1], centre_pos[2], centre_pos[3]
+    testbot.move_to(x, y, z + 5, r)
+
