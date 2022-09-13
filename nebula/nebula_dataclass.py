@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from random import random
+from random import random, randrange
 
 # todo - dataclasses can be quite slow.
 #  Perhaps replace with record class, slots or other [HIGH]
@@ -39,5 +39,5 @@ class NebulaDataClass:
     affect_decision: str = " "
     """Current stream chosen by affect process"""
 
-    rhythm_rate: float = 0.1
+    rhythm_rate: float = randrange(30, 100) / 100
     """Internal clock/ rhythm sub division"""

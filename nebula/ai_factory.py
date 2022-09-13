@@ -26,7 +26,7 @@ class AIFactory:
 
         self.net_logging = False
         self.datadict = datadict
-        self.global_speed = speed  # / 10
+        self.global_speed = speed # * 10
         self.running = True
 
         # instantiate nets as objects and make  models
@@ -63,12 +63,15 @@ class AIFactory:
 
         # now spin the plate and do its own ting
         while self.running:
-            # calc rhythmic intensity based on self-awareness factor & global speed
-            intensity = getattr(self.datadict, 'self_awareness')
+            # # calc rhythmic intensity based on self-awareness factor & global speed
+            # intensity = getattr(self.datadict, 'self_awareness')
             # print('////////////////////////   intensity = ', intensity)
-            rhythm_rate =  rhythm_rate / self.global_speed # (rhythm_rate * intensity) * self.global_speed
-            # self.datadict['rhythm_rate'] = rhythm_rate
-            setattr(self.datadict, 'rhythm_rate', rhythm_rate)
+            #
+            # # todo - move rhythm rate to affect?
+            # rhythm_rate = randrange(30, 100) / 1000  #  round(((rhythm_rate / intensity) * self.global_speed), 2) # / 10  # rhythm_rate * self.global_speed
+            # # self.datadict['rhythm_rate'] = rhythm_rate
+            # setattr(self.datadict, 'rhythm_rate', rhythm_rate)
+            # print(f'////////////////////////   rhythm rate = {rhythm_rate}')
 
             # PATCH BOARD - CROSS PLUGS NET OUTPUTS TO INPUTS
             # get input vars from dict (NB not always self)
