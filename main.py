@@ -84,13 +84,14 @@ class DrawBot:
         while self.running:
             # get current nebula emission value
             live_emission_data = self.nebula.user_live_emission_data()
-            print(f"emission value = {live_emission_data}")
+            print(f"MAIN: emission value = {live_emission_data}")
             if live_emission_data != self.old_value:
                 # multiply by 10 for local logic
                 value_int = int(live_emission_data * 10)
                 self.dobot_commands(value_int)
 
             else:
+                print("MAIN: sleep")
                 sleep(1)
 
     def dobot_commands(self, incoming_command):
@@ -115,7 +116,7 @@ class DrawBot:
         if getrandbits(1):
             wait = True
         else:
-            wait = True
+            wait = False
 
         print(f'{incoming_command}: DOBOT draw command = {command_list[incoming_command]}, drawing={draw}, wait={wait}')
 

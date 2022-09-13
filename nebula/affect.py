@@ -67,6 +67,16 @@ class Affect:
 
             # 2. child cycle: waiting for interrupt  from master clock
             while time() < loop_end:
+                # calc rhythmic intensity based on self-awareness factor & global speed
+                intensity = getattr(self.datadict, 'self_awareness')
+                # print('////////////////////////   intensity = ', intensity)
+
+                rhythm_rate = randrange(30,
+                                        100) / 100  # round(((rhythm_rate / intensity) * self.global_speed), 2) # / 10  # rhythm_rate * self.global_speed
+                # self.datadict['rhythm_rate'] = rhythm_rate
+                setattr(self.datadict, 'rhythm_rate', rhythm_rate)
+                # print(f'////////////////////////   rhythm rate = {rhythm_rate}')
+
                 # if a major break out then go to Daddy cycle and restart
                 if not self.interrupt_bang:
                     break
@@ -89,18 +99,6 @@ class Affect:
 
                 # 3. baby cycle - own time loops
                 while time() < end_time:
-
-                    # todo - rhythm rate in here? randrange(30, 100) / 1000
-                    # calc rhythmic intensity based on self-awareness factor & global speed
-                    intensity = getattr(self.datadict, 'self_awareness')
-                    print('////////////////////////   intensity = ', intensity)
-
-                    # todo - move rhythm rate to affect?
-                    rhythm_rate = randrange(30,
-                                            100) / 100  # round(((rhythm_rate / intensity) * self.global_speed), 2) # / 10  # rhythm_rate * self.global_speed
-                    # self.datadict['rhythm_rate'] = rhythm_rate
-                    setattr(self.datadict, 'rhythm_rate', rhythm_rate)
-                    print(f'////////////////////////   rhythm rate = {rhythm_rate}')
 
                     if self.affect_logging:
                         print('\t\t\t\t\t\t\t\t=========Hello - baby cycle 2 ===========')

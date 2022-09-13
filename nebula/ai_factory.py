@@ -63,16 +63,6 @@ class AIFactory:
 
         # now spin the plate and do its own ting
         while self.running:
-            # # calc rhythmic intensity based on self-awareness factor & global speed
-            # intensity = getattr(self.datadict, 'self_awareness')
-            # print('////////////////////////   intensity = ', intensity)
-            #
-            # # todo - move rhythm rate to affect?
-            # rhythm_rate = randrange(30, 100) / 1000  #  round(((rhythm_rate / intensity) * self.global_speed), 2) # / 10  # rhythm_rate * self.global_speed
-            # # self.datadict['rhythm_rate'] = rhythm_rate
-            # setattr(self.datadict, 'rhythm_rate', rhythm_rate)
-            # print(f'////////////////////////   rhythm rate = {rhythm_rate}')
-
             # PATCH BOARD - CROSS PLUGS NET OUTPUTS TO INPUTS
             # get input vars from dict (NB not always self)
             in_val1 = self.get_in_val(0)  # move RNN as input

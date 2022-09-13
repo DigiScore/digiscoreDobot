@@ -186,15 +186,15 @@ class Digidobot:
     def pen_ready(self, ready_to_draw: bool):
         """moves the drawing pen onto page ready to draw"""
         current_position = self.interface.get_pose()
-        print(f'current position = {current_position}')
+        # print(f'current position = {current_position}')
         x, y, r = current_position[0], current_position[1], current_position[3]
         draw_z = self.centre_pos[2]
         if ready_to_draw:
-            print(f"Ready to draw x:{x}, y:{y}, z:{draw_z}")
+            # print(f"Ready to draw x:{x}, y:{y}, z:{draw_z}")
             # self.bot.move_to_relative(0, 0, -5, 0)
             self.bot.move_to(x, y, draw_z, r)
         else:
-            print(f"Ready to move x:{x}, y:{y}, z:{draw_z + 5}")
+            # print(f"Ready to move x:{x}, y:{y}, z:{draw_z + 5}")
             # self.bot.move_to_relative(0, 0, 5, 0)
             self.bot.move_to(x, y, draw_z + 5, r)
 
