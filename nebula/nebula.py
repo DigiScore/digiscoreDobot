@@ -99,6 +99,7 @@ class Nebula:
     def user_live_emission_data(self):
         """Returns the current value of the AI factory master output"""
         return self.affect.live_emission_data
+        # return getattr(self.datadict, 'master_output')
 
     def user_input(self, user_input_value: float):
         """High-level input from client usually from

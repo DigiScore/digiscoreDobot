@@ -41,6 +41,8 @@ class AIFactory:
         print('MoveAffectCONV2 initialization')
         self.affect_perception = tf.keras.models.load_model('nebula/models/EMR-full-sept-2021_conv2D_move-affect.h5')
 
+        tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+
         # name list for nets that align to factory above
         self.netnames = ['move_rnn',
                          'affect_rnn',
@@ -71,10 +73,10 @@ class AIFactory:
             in_val4 = self.get_in_val(1)  # affect RNN as input
 
             # send in vals to net object for prediction
-            pred1 = self.move_net.predict(in_val1, verbose=0)
-            pred2 = self.affect_net.predict(in_val2, verbose=0)
-            pred3 = self.move_affect_net.predict(in_val3, verbose=0)
-            pred4 = self.affect_move_net.predict(in_val4, verbose=0)
+            pred1 = self.move_net.predict(in_val1)
+            pred2 = self.affect_net.predict(in_val2)
+            pred3 = self.move_affect_net.predict(in_val3)
+            pred4 = self.affect_move_net.predict(in_val4)
 
             # special case for self awareness stream
             self_aware_input = self.get_in_val(5)  # main movement as input

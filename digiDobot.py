@@ -148,39 +148,47 @@ class Digidobot:
         # setup a client incoming command list
         self.incoming_command_list = []
 
-        # reset any lingering errors
-        # todo - this doesnt
-        self.reset_errors()
-
         # drawing or notdrawing y offset
         self.drawing = False
         self.not_drawing_offset = -5
 
         print('locating home')
-        self.ready_position = self.bot.home()
+        # self.ready_position = \
+        self.bot.home()
+        # self.reset_errors()
 
         print('Unlock the arm and place it on the middle of the paper')
         input("Press enter to continue...")
 
+        # Remember starting position for pen lift
         self.centre_pos = self.interface.get_pose()
         print(f'Centre position (x, y, z, r): {self.centre_pos[0:4]}, angles = {self.centre_pos[4:]}')
         self.pen_ready(False)
 
-    def move_to(self, new_relative_pos: tuple, wait: bool = True):
-        """move the pen head to a relative position
+    def move_to_rel(self, new_relative_pos: tuple, wait: bool = True):
+        """move the pen head to a relative position x, y,
         from current position"""
         self.bot.move_to_relative(new_relative_pos[0],
                                   new_relative_pos[1],
                                   0, 0,
                                   wait=wait)
 
-    def slide_to(self, new_relative_pos: tuple, wait: bool = True):
-        """Slide to a relative coordinate, 
+    def slide_to_rel(self, new_relative_pos: tuple, wait: bool = True):
+        """Slide to a relative coordinate x, y,
         shortest possible path"""
         self.bot.slide_to_relative(new_relative_pos[0],
                                    new_relative_pos[1],
                                    0, 0,
                                    wait=wait)
+
+    def move_to(self, new_pos: tuple, wait: bool = True):
+        """move the pen head to a relative position x, y, z, r
+                from current position"""
+        x, y, z, r = new_pos[0], \
+                     new_pos[1], \
+                     new_pos[2], \
+                     new_pos[3]
+        self.bot.move_to(x, y, z, r)
 
     # todo - all these functions can be with or without pen draw
     def pen_ready(self, ready_to_draw: bool):
@@ -199,7 +207,6 @@ class Digidobot:
             self.bot.move_to(x, y, draw_z + 5, r)
 
         self.reset_errors()
-
 
     def squiggle(self, arc_list: list,
                  drawing: bool = True,
@@ -334,7 +341,6 @@ class Digidobot:
         alarms = self.interface.get_alarms_state()
         # print(alarms)
         self.alarms(alarms)
-        self.interface.clear_alarms_state()
 
     def alarms(self, alarm_response):
         alarms = []
@@ -342,11 +348,15 @@ class Digidobot:
             for j in range(8):
                 if x & (1 << j) > 0:
                     alarms.append(8 * i + j)
-        for alarm in alarms:
-            try:
-                print('ALARM:', alarm_dict[alarm])
-            except:
-                print('ALARM: not in list')
+        if len(alarms) > 0:
+            for alarm in alarms:
+                try:
+                    print('ALARM:', alarm_dict[alarm])
+                except:
+                    print('ALARM: not in list')
+            # self.bot.home()
+            self.interface.clear_alarms_state()
+            # self.move_to(self.centre_pos[:4])
 
     def close(self):
         self.interface.close()

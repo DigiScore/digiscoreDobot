@@ -91,8 +91,8 @@ class DrawBot:
                 self.dobot_commands(value_int)
 
             else:
-                print("MAIN: sleep")
-                sleep(1)
+                # print("MAIN: sleep")
+                sleep(0.1)
 
     def dobot_commands(self, incoming_command):
         command_list = ["circle",
@@ -118,7 +118,7 @@ class DrawBot:
         else:
             wait = False
 
-        print(f'{incoming_command}: DOBOT draw command = {command_list[incoming_command]}, drawing={draw}, wait={wait}')
+        print(f'DOBOT: {incoming_command}: draw command = {command_list[incoming_command]}, drawing={draw}, wait={wait}')
 
         if incoming_command == 1:
             self.digibot.circle(self.rnd(), draw, wait)
@@ -128,7 +128,7 @@ class DrawBot:
                 squiggle_list.append((self.rnd(), self.rnd(), self.rnd()))
             self.digibot.squiggle(squiggle_list, draw, wait)
         elif incoming_command == 3:
-            self.digibot.move_to((self.rnd(), self.rnd()))
+            self.digibot.move_to_rel((self.rnd(), self.rnd()))
         elif incoming_command == 4:
             self.digibot.circle_arc(self.rnd(), [(self.rnd(), self.rnd(), self.rnd())], draw, wait)
         elif incoming_command == 5:
@@ -140,7 +140,7 @@ class DrawBot:
         elif incoming_command == 8:
             self.digibot.circle(self.rnd(), wait)
         else:
-            self.digibot.slide_to((self.rnd(), self.rnd()), wait)
+            self.digibot.slide_to_rel((self.rnd(), self.rnd()), wait)
 
 
 if __name__ == "__main__":
