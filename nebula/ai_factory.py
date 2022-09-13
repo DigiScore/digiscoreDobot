@@ -60,11 +60,11 @@ class AIFactory:
 
         Do not disturb - it has its own life cycle"""
 
-        # get the first rhythm rate from the datadict
-        rhythm_rate = getattr(self.datadict, 'rhythm_rate')
-
         # now spin the plate and do its own ting
         while self.running:
+            # get the first rhythm rate from the datadict
+            rhythm_rate = getattr(self.datadict, 'rhythm_rate')
+
             # PATCH BOARD - CROSS PLUGS NET OUTPUTS TO INPUTS
             # get input vars from dict (NB not always self)
             in_val1 = self.get_in_val(0)  # move RNN as input

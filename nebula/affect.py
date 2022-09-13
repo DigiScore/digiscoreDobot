@@ -75,7 +75,7 @@ class Affect:
                                         100) / 100  # round(((rhythm_rate / intensity) * self.global_speed), 2) # / 10  # rhythm_rate * self.global_speed
                 # self.datadict['rhythm_rate'] = rhythm_rate
                 setattr(self.datadict, 'rhythm_rate', rhythm_rate)
-                # print(f'////////////////////////   rhythm rate = {rhythm_rate}')
+                print(f'////////////////////////   rhythm rate = {rhythm_rate}')
 
                 # if a major break out then go to Daddy cycle and restart
                 if not self.interrupt_bang:
@@ -165,6 +165,12 @@ class Affect:
 
                     # and wait for a cycle
                     sleep(rhythm_rate)
+
+                # and wait for a cycle
+                sleep(rhythm_rate)
+
+            # and wait for a cycle
+            sleep(rhythm_rate)
 
     def emitter(self, incoming_affect_listen):
         if incoming_affect_listen != self.old_val:

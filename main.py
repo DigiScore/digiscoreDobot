@@ -9,12 +9,12 @@ from digiDobot import Digidobot
 
 class DrawBot:
     def __init__(self):
+        # start dobot
+        self.digibot = Digidobot()
+
         # start Nebula
         self.nebula = Nebula(speed=1)
         self.nebula.director()
-
-        # start dobot
-        self.digibot = Digidobot()
 
         # set up mic listening funcs
         self.CHUNK = 2 ** 11
@@ -34,8 +34,7 @@ class DrawBot:
         dobot_thread = Thread(target=self.dobot_control)
         listener_thread.start()
         dobot_thread.start()
-        # listener_thread.join()
-
+        listener_thread.join()
 
     def director(self):
         print("Starting mic listening stream & thread")
@@ -48,7 +47,7 @@ class DrawBot:
 
             if peak > 2000:
                 bars = "#" * int(50 * peak / 2 ** 16)
-                print("%05d %s" % (peak, bars))
+                print("MIC LISTENER: %05d %s" % (peak, bars))
 
             # normalise it for range 0.0 - 1.0
             normalised_peak = ((peak - 0) / (20000 - 0)) * (1 - 0) + 0
@@ -76,13 +75,14 @@ class DrawBot:
             multiplication_factor = randrange(1, 2)
         else:
             multiplication_factor = 0
-        return (random() * posneg) * multiplication_factor
+        return (random() * multiplication_factor) * posneg
 
     def dobot_control(self):
         print("Started dobot control thread")
 
         while self.running:
             # get current nebula emission value
+            # print(f'DOBOT: Connected {self.digibot.bot.connected()}')
             live_emission_data = self.nebula.user_live_emission_data()
             print(f"MAIN: emission value = {live_emission_data}")
             if live_emission_data != self.old_value:
