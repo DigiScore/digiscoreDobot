@@ -152,18 +152,27 @@ class Digidobot:
         self.drawing = False
         self.not_drawing_offset = -5
 
+        # safe place
+        self.safe_place = (266, 3, -48, 0)
+
         print('locating home')
         # self.ready_position = \
         self.bot.home()
         # self.reset_errors()
 
-        print('Unlock the arm and place it on the middle of the paper')
-        input("Press enter to continue...")
+        print('remove pen')
+        self.draw_stave()
 
-        # Remember starting position for pen lift
-        self.centre_pos = self.interface.get_pose()
-        print(f'Centre position (x, y, z, r): {self.centre_pos[0:4]}, angles = {self.centre_pos[4:]}')
-        self.pen_ready(False)
+        # print('Unlock the arm and place it on the middle of the paper')
+        # input("Press enter to continue...")
+        #
+        # # Remember starting position for pen lift
+        # self.centre_pos = self.interface.get_pose()
+        # self.print_position(self.centre_pos)
+        # self.pen_ready(False)
+
+    def print_position(self, position):
+        print(f'Centre position (x, y, z, r): {position[0:4]}, angles = {position[4:]}')
 
     def move_to_rel(self, new_relative_pos: tuple, wait: bool = True):
         """move the pen head to a relative position x, y,
@@ -182,7 +191,7 @@ class Digidobot:
                                    wait=wait)
 
     def move_to(self, new_pos: tuple, wait: bool = True):
-        """move the pen head to a relative position x, y, z, r
+        """move the pen head to a cartesian position x, y, z, r
                 from current position"""
         x, y, z, r = new_pos[0], \
                      new_pos[1], \
@@ -190,21 +199,29 @@ class Digidobot:
                      new_pos[3]
         self.bot.move_to(x, y, z, r)
 
+    def slide_to(self, new_pos: tuple, wait: bool = True):
+        """move the pen head to a cartesian position x, y, z, r
+                from current position quickly. Used for rapid movement"""
+        x, y, z, r = new_pos[0], \
+                     new_pos[1], \
+                     new_pos[2], \
+                     new_pos[3]
+        self.bot.slide_to(x, y, z, r)
+
     # todo - all these functions can be with or without pen draw
     def pen_ready(self, ready_to_draw: bool):
         """moves the drawing pen onto page ready to draw"""
         current_position = self.interface.get_pose()
         # print(f'current position = {current_position}')
-        x, y, r = current_position[0], current_position[1], current_position[3]
-        draw_z = self.centre_pos[2]
+        x, y, z, r = current_position[:4]
         if ready_to_draw:
             # print(f"Ready to draw x:{x}, y:{y}, z:{draw_z}")
             # self.bot.move_to_relative(0, 0, -5, 0)
-            self.bot.move_to(x, y, draw_z, r)
+            self.bot.move_to(x, y, 0, r)
         else:
             # print(f"Ready to move x:{x}, y:{y}, z:{draw_z + 5}")
             # self.bot.move_to_relative(0, 0, 5, 0)
-            self.bot.move_to(x, y, draw_z + 5, r)
+            self.bot.move_to(x, y, 10, r)
 
         self.reset_errors()
 
@@ -266,15 +283,15 @@ class Digidobot:
         """ go to default home position"""
         self.bot.home()
 
-    def centre(self):
-        """ go to initial middle of paper position"""
-        self.drawing = False
-        x, y, z, r = self.centre_pos[4], \
-                     self.centre_pos[5], \
-                     self.centre_pos[6], \
-                     self.centre_pos[7]
-        print(x, y, z, r)
-        self.bot.slide_to(x, y, z, r)
+    # def centre(self):
+    #     """ go to initial middle of paper position"""
+    #     self.drawing = False
+    #     x, y, z, r = self.centre_pos[4], \
+    #                  self.centre_pos[5], \
+    #                  self.centre_pos[6], \
+    #                  self.centre_pos[7]
+    #     print(x, y, z, r)
+    #     self.bot.slide_to(x, y, z, r)
 
     def dot(self, wait: bool = True):
         self.circle(0.1, wait=wait)
@@ -307,40 +324,31 @@ class Digidobot:
         if drawing:
             self.pen_ready(False)
 
-    # # todo - this doesnt work LOW
-    # def stave(self):
-    #     centre = self.bot.get_pose()
-    #     [x, y, z, r] = centre[0:4]
-    #     for line in range(5):
-    #         self.pen_ready(True)
-    #         self.bot.move_to_relative(-10, 0, 0, 0)
-    #         self.pen_ready(False)
-    #         y += 2
-    #         self.bot.move_to(x, y, z, r)
-    #
-    # # todo - this is tricky. Needed?
-    # def letters(self, letter: str):
-    #     """draws a musical letter such as m, p, f.
-    #     anchor point is far left"""
-    #     self.pen_ready(True)
-    #     [x, y, z, r] = self.bot.get_pose()[0:4]
-    #     if letter == "m":
-    #         self.bot.move_to_relative(-2, 0, 0, 0)
-    #         self.interface.set_arc_command([x + 1, y, z, r], [x + 1, y + 1, z, r])
-    #         self.bot.move_to_relative(2, 0, 0, 0)
-    #         self.bot.move_to_relative(-2, 0, 0, 0)
-    #         [x, y, z, r] = self.bot.get_pose()[0:4]
-    #         self.interface.set_arc_command([x + 1, y, z, r], [x + 1, y + 1, z, r])
-    #     elif letter == "p":
-    #         pass
-    #     elif letter == "f":
-    #         pass
-    #     self.pen_ready(False)
-
     def reset_errors(self):
         alarms = self.interface.get_alarms_state()
         # print(alarms)
         self.alarms(alarms)
+
+    # todo - multiple staff lines [LOW]
+    def draw_stave(self, staves: int = 1):
+        """Draws a  line across the middle of an A3 paper, symbolising a stave.
+        Has optional function to draw multiple staves.
+        Args:
+            staves: number of lines to draw. Default = 1"""
+        stave_start_pos = (210, 210, 0, 0)
+        stave_end_pos = (210, -210, 0, 0)
+
+        # goto start position for line draw, without pen
+        x1, y1, z1, r1 = stave_start_pos[:4]
+        x2, y2, z2, r2 = stave_end_pos[:4]
+        self.slide_to((x1, y1, z1, r1))
+
+        # draw a line/ stave
+        input('Insert pen, then press enter')
+        self.move_to((x2, y2, z2, r2))
+
+        # goto standby position
+        self.move_to((210, -210, 20, 0))
 
     def alarms(self, alarm_response):
         alarms = []
@@ -349,14 +357,14 @@ class Digidobot:
                 if x & (1 << j) > 0:
                     alarms.append(8 * i + j)
         if len(alarms) > 0:
+            # self.move_to(self.safe_place[:4])
             for alarm in alarms:
                 try:
                     print('ALARM:', alarm_dict[alarm])
                 except:
                     print('ALARM: not in list')
-            # self.bot.home()
             self.interface.clear_alarms_state()
-            # self.move_to(self.centre_pos[:4])
+        # self.bot.home()
 
     def close(self):
         self.interface.close()
@@ -364,8 +372,19 @@ class Digidobot:
 if __name__ == "__main__":
     digibot = Digidobot()
     digibot.reset_errors()
-    digibot.squiggle([(10, 10, 10),
-                     (5, 5, 5)],
-                     True,
-                     True)
-    print(digibot.interface.get_pose())
+    # digibot.draw_stave()
+
+
+
+    # digibot.squiggle([(10, 10, 10),
+    #                  (5, 5, 5)],
+    #                  True,
+    #                  True)
+    # start_pos = digibot.interface.get_pose()
+    # digibot.print_position(start_pos)
+    # while True:
+    #     input('move to new position')
+    #     start_pos = digibot.interface.get_pose()
+    #     digibot.print_position(start_pos)
+
+

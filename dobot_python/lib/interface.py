@@ -22,7 +22,7 @@ class Interface:
     def send(self, message):
         self.lock.acquire()
         if self.verbose:
-            print(message.package())
+            print(f'INTERFACE: {message.package()}')
         self.serial.write(message.package())
         self.serial.flush()
         response = Message.read(self.serial)
@@ -30,15 +30,15 @@ class Interface:
         self.lock.release()
         return response.params
 
-    def send_raw(self, message):
-        self.lock.acquire()
-        if self.verbose:
-            print(message)
-        self.serial.write(message)
-        self.serial.flush()
-        response = self.serial.read()
-        # print(f"DOBOT RESPONSE: {response.params}")
-        self.lock.release()
+    # def send_raw(self, message):
+    #     self.lock.acquire()
+    #     if self.verbose:
+    #         print(message)
+    #     self.serial.write(message)
+    #     self.serial.flush()
+    #     response = self.serial.read()
+    #     # print(f"DOBOT RESPONSE: {response.params}")
+    #     self.lock.release()
 
     def connected(self):
         return self.serial.isOpen()
@@ -95,13 +95,13 @@ class Interface:
         request = Message([0xAA, 0xAA], 2, 20, False, False, [], direction='out')
         return self.send(request)
 
-    # def clear_alarms_state(self):
-    #     request = Message([0xAA, 0xAA], 2, 21, True, False, [], direction='out')
-    #     return self.send(request)
-
     def clear_alarms_state(self):
-        request = b'\xaa\xaa\x02\x14\x01\xeb'
-        return self.send_raw(request)
+        request = Message([0xAA, 0xAA], 2, 21, True, False, [], direction='out')
+        return self.send(request)
+
+    # def clear_alarms_state(self):
+    #     request = b'\xaa\xaa\x02\x14\x01\xeb'
+    #     return self.send_raw(request)
 
     def get_homing_parameters(self):
         request = Message([0xAA, 0xAA], 2, 30, False, False, [], direction='out')
