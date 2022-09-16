@@ -153,7 +153,7 @@ class Digidobot:
         self.not_drawing_offset = -5
 
         # safe place
-        self.safe_place = (266, 3, -48, 0)
+        self.safe_place = (300, 0, 10, 0)
 
         print('locating home')
         # self.ready_position = \

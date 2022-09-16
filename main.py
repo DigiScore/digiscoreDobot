@@ -11,6 +11,8 @@ class DrawBot:
     def __init__(self):
         # start dobot
         self.digibot = Digidobot()
+        safe_place = self.digibot.safe_place
+        self.digibot.slide_to(safe_place)
 
         # start Nebula
         self.nebula = Nebula(speed=1)
@@ -66,9 +68,9 @@ class DrawBot:
     def rnd(self, power_of_command):
         # movement + or - (random)
         if getrandbits(1):
-            posneg = 10
+            posneg = 1
         else:
-            posneg = -10
+            posneg = -1
 
         # multiplication factor
         if getrandbits(1):
@@ -114,35 +116,37 @@ class DrawBot:
                         "slide to relative",
                         "slide to relative"]
 
-        # randomly draw or move
-        if getrandbits(1):
-            draw = True
-        else:
-            draw = False
-
-        # randomly wait or not
-        if getrandbits(1):
-            wait = True
-        else:
-            wait = False
+        # # randomly draw or move
+        # if getrandbits(1):
+        #     draw = True
+        # else:
+        #     draw = False
+        #
+        # # randomly wait or not
+        # if getrandbits(1):
+        #     wait = True
+        # else:
+        #     wait = True
 
         # low power response from AI Factory
         if incoming_command < 3:
-            self.digibot.move_to_rel((self.rnd(2), self.rnd(2)))
+            self.digibot.pen_ready(False)
+            self.digibot.move_to_rel((self.rnd(2), self.rnd(2)), False)
             # print result
-            print(f'DOBOT: {incoming_command}: draw command = "move to relative, drawing={draw}, wait={wait}')
+            print(f'DOBOT: {incoming_command}: draw command = "move to relative", wait=False')
 
         # high power response from AI Factory
         elif incoming_command >= 8:
+            self.digibot.pen_ready(True)
             if incoming_command == 1:
-                self.digibot.circle(self.rnd(incoming_command), draw, wait)
+                self.digibot.circle(self.rnd(incoming_command))
             elif incoming_command == 2:
                 squiggle_list = []
                 for n in range(randrange(2, 10)):
                     squiggle_list.append((self.rnd(incoming_command),
                                           self.rnd(incoming_command),
                                           self.rnd(incoming_command)))
-                self.digibot.squiggle(squiggle_list, draw, wait)
+                self.digibot.squiggle(squiggle_list)
             elif incoming_command == 3:
                 self.digibot.move_to_rel((self.rnd(incoming_command),
                                           self.rnd(incoming_command)))
@@ -151,32 +155,33 @@ class DrawBot:
                                         [(self.rnd(incoming_command),
                                           self.rnd(incoming_command),
                                           self.rnd(incoming_command))
-                                         ], draw, wait)
+                                         ])
             elif incoming_command == 5:
                 self.digibot.dot()
             elif incoming_command == 6:
                 self.digibot.circle_line(self.rnd(incoming_command),
                                          (self.rnd(incoming_command), self.rnd(incoming_command)
-                                          ), draw, wait)
+                                          ))
             elif incoming_command == 7:
                 self.digibot.line((self.rnd(incoming_command),
                                    self.rnd(incoming_command)
-                                   ), draw, wait)
+                                   ))
             elif incoming_command == 8:
-                self.digibot.circle(self.rnd(incoming_command), wait)
+                self.digibot.circle(self.rnd(incoming_command))
             else:
                 self.digibot.slide_to_rel((self.rnd(incoming_command),
                                            self.rnd(incoming_command)
-                                           ), wait)
-            print(f'DOBOT: {incoming_command}: draw command = {command_list[incoming_command]}, drawing={draw}, wait={wait}')
+                                           ))
+            print(f'DOBOT: {incoming_command}: draw command = {command_list[incoming_command]}, drawing=True, wait=True')
 
         else:
+            self.digibot.pen_ready(True)
             squiggle_list = (self.rnd(incoming_command),
                              self.rnd(incoming_command),
                              self.rnd(incoming_command)
                              )
-            self.digibot.squiggle([squiggle_list], draw, wait)
-            print(f'DOBOT: {incoming_command}: draw command = "Squiggle", drawing={draw}, wait={wait}')
+            self.digibot.squiggle([squiggle_list])
+            print(f'DOBOT: {incoming_command}: draw command = "Squiggle", drawing=True, wait=True')
 
 
 if __name__ == "__main__":
