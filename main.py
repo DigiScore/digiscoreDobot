@@ -1,18 +1,17 @@
 from nebula.nebula import Nebula
-from time import sleep
+from time import sleep, time
 from threading import Thread
 from random import random, randrange, getrandbits
 import pyaudio
 import numpy as np
+import logging
 
 from digiDobot import Digidobot
 
 class DrawBot:
-    def __init__(self):
+    def __init__(self, duration_of_piece: int = 120):
         # start dobot
         self.digibot = Digidobot()
-        safe_place = self.digibot.safe_place
-        self.digibot.slide_to(safe_place)
 
         # start Nebula
         self.nebula = Nebula(speed=1)
@@ -28,10 +27,20 @@ class DrawBot:
                                   input=True,
                                   frames_per_buffer=self.CHUNK)
 
-        # start the bot listening and drawing
+        # stat operating vars
         self.running = True
         self.old_value = 0
+        self.start_time = time()
+        self.end_time = self.start_time + duration_of_piece
 
+        # get y-creep sub-division e.g. 420 points across
+        # the y-stave, divided by time in seconds
+        # self.duration = duration_of_piece
+        self.sub_division_of_duration = duration_of_piece / 420
+        print('sub division = ', self.sub_division_of_duration)
+
+        # start the bot listening and drawing
+        # while time() < end_time:
         listener_thread = Thread(target=self.director)
         dobot_thread = Thread(target=self.dobot_control)
         listener_thread.start()
@@ -86,7 +95,7 @@ class DrawBot:
         # todo - healthchecker here inc position check and righting
         while self.running:
             # get current nebula emission value
-            # print(f'DOBOT: Connected {self.digibot.bot.connected()}')
+            print(f'DOBOT: Connected {self.digibot.bot.connected()}')
             live_emission_data = self.nebula.user_live_emission_data()
             print(f"MAIN: emission value = {live_emission_data}")
             if live_emission_data != self.old_value:
@@ -97,6 +106,20 @@ class DrawBot:
             else:
                 # print("MAIN: sleep")
                 sleep(0.1)
+
+            # move y along a bit
+            elapsed = int(time() - self.start_time)
+            current_y_delta = elapsed * self.sub_division_of_duration
+            position_list = self.digibot.current_position()
+            nowx, nowy, nowz, nowr = position_list[:4]
+            print('elapsed time = ', elapsed)
+            print(f'old y = {nowy}, move to = {nowy + current_y_delta}')
+            self.digibot.slide_to((nowx, nowy + current_y_delta, nowz, nowr))
+
+            # check end of duration
+            if time() > self.end_time:
+                self.digibot.close()
+                self.running = False
 
     def dobot_commands(self, incoming_command):
         """Controls the symbolic interpretation of Master Output from AI Factory
@@ -131,7 +154,7 @@ class DrawBot:
         # low power response from AI Factory
         if incoming_command < 3:
             self.digibot.pen_ready(False)
-            self.digibot.move_to_rel((self.rnd(2), self.rnd(2)), False)
+            self.digibot.move_to_rel((self.rnd(2), self.rnd(2)))
             # print result
             print(f'DOBOT: {incoming_command}: draw command = "move to relative", wait=False')
 

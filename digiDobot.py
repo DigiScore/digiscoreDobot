@@ -130,7 +130,7 @@ alarm_dict = {
         }
 
 class Digidobot:
-
+    """Controls movement and shapes drawn by Dobot"""
     def __init__(self):
         # set global path
         sys.path.insert(0, os.path.abspath('.'))
@@ -366,6 +366,11 @@ class Digidobot:
             self.interface.clear_alarms_state()
         # self.bot.home()
 
+    def current_position(self):
+        """returns current position x, y, z, r as list"""
+        position_list = self.interface.get_pose()[0:4]
+        return position_list
+
     def close(self):
         self.interface.close()
 
@@ -376,10 +381,10 @@ if __name__ == "__main__":
 
 
 
-    # digibot.squiggle([(10, 10, 10),
-    #                  (5, 5, 5)],
-    #                  True,
-    #                  True)
+    digibot.squiggle([(10.2, 10.4, 10.6),
+                     (5.121, 5.1346345, 5)],
+                     True,
+                     True)
     # start_pos = digibot.interface.get_pose()
     # digibot.print_position(start_pos)
     # while True:

@@ -10,7 +10,7 @@ from dobot_python.lib.interface import Interface
 
 class Dobot:
     def __init__(self, port):
-        self.interface = Interface(port)
+        self.interface = Interface(port, verbose=False)
 
         self.interface.stop_queue(True)
         self.interface.clear_queue()

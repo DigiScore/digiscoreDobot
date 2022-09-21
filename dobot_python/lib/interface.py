@@ -5,11 +5,11 @@ from dobot_python.lib.message import Message
 
 
 class Interface:
-    def __init__(self, port):
+    def __init__(self, port, verbose: bool = False):
         threading.Thread.__init__(self)
         self.lock = threading.Lock()
 
-        self.verbose = True
+        self.verbose = verbose
 
         self.serial = serial.Serial(
             port=port,
