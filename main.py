@@ -11,7 +11,7 @@ from digiDobot import Digidobot
 class DrawBot:
     def __init__(self, duration_of_piece: int = 120):
         # start dobot
-        self.digibot = Digidobot()
+        self.digibot = Digidobot(verbose=True)
 
         # start Nebula
         self.nebula = Nebula(speed=1)
@@ -27,7 +27,7 @@ class DrawBot:
                                   input=True,
                                   frames_per_buffer=self.CHUNK)
 
-        # stat operating vars
+        # start operating vars
         self.running = True
         self.old_value = 0
         self.start_time = time()
@@ -95,7 +95,7 @@ class DrawBot:
         # todo - healthchecker here inc position check and righting
         while self.running:
             # get current nebula emission value
-            print(f'DOBOT: Connected {self.digibot.bot.connected()}')
+            # print(f'DOBOT: Connected {self.digibot.bot.connected()}')
             live_emission_data = self.nebula.user_live_emission_data()
             print(f"MAIN: emission value = {live_emission_data}")
             if live_emission_data != self.old_value:
@@ -111,6 +111,7 @@ class DrawBot:
             elapsed = int(time() - self.start_time)
             current_y_delta = elapsed * self.sub_division_of_duration
             position_list = self.digibot.current_position()
+            self.digibot.print_position(position_list)
             nowx, nowy, nowz, nowr = position_list[:4]
             print('elapsed time = ', elapsed)
             print(f'old y = {nowy}, move to = {nowy + current_y_delta}')
@@ -118,6 +119,7 @@ class DrawBot:
 
             # check end of duration
             if time() > self.end_time:
+
                 self.digibot.close()
                 self.running = False
 
@@ -153,25 +155,25 @@ class DrawBot:
 
         # low power response from AI Factory
         if incoming_command < 3:
-            self.digibot.pen_ready(False)
-            self.digibot.move_to_rel((self.rnd(2), self.rnd(2)))
+            # self.digibot.pen_ready(False)
+            self.digibot.slide_to_rel((self.rnd(2), self.rnd(2)))
             # print result
             print(f'DOBOT: {incoming_command}: draw command = "move to relative", wait=False')
 
         # high power response from AI Factory
         elif incoming_command >= 8:
-            self.digibot.pen_ready(True)
+            # self.digibot.pen_ready(True)
             if incoming_command == 1:
                 self.digibot.circle(self.rnd(incoming_command))
             elif incoming_command == 2:
                 squiggle_list = []
-                for n in range(randrange(2, 10)):
+                for n in range(randrange(2, 4)):
                     squiggle_list.append((self.rnd(incoming_command),
                                           self.rnd(incoming_command),
                                           self.rnd(incoming_command)))
                 self.digibot.squiggle(squiggle_list)
             elif incoming_command == 3:
-                self.digibot.move_to_rel((self.rnd(incoming_command),
+                self.digibot.slide_to_rel((self.rnd(incoming_command),
                                           self.rnd(incoming_command)))
             elif incoming_command == 4:
                 self.digibot.circle_arc(self.rnd(incoming_command),
@@ -191,6 +193,7 @@ class DrawBot:
                                    ))
             elif incoming_command == 8:
                 self.digibot.circle(self.rnd(incoming_command))
+
             else:
                 self.digibot.slide_to_rel((self.rnd(incoming_command),
                                            self.rnd(incoming_command)
@@ -198,7 +201,7 @@ class DrawBot:
             print(f'DOBOT: {incoming_command}: draw command = {command_list[incoming_command]}, drawing=True, wait=True')
 
         else:
-            self.digibot.pen_ready(True)
+            # self.digibot.pen_ready(True)
             squiggle_list = (self.rnd(incoming_command),
                              self.rnd(incoming_command),
                              self.rnd(incoming_command)

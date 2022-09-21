@@ -9,8 +9,8 @@ from dobot_python.lib.interface import Interface
 
 
 class Dobot:
-    def __init__(self, port):
-        self.interface = Interface(port, verbose=False)
+    def __init__(self, port, verbose: bool = False):
+        self.interface = Interface(port, verbose=verbose)
 
         self.interface.stop_queue(True)
         self.interface.clear_queue()
@@ -89,7 +89,7 @@ class Dobot:
             if self.interface.get_current_queue_index() > queue_index:
                 break
 
-            sleep(0.5)
+            # sleep(0.5)
 
     # Move according to the given path
     def follow_path(self, path, wait=True):
@@ -130,23 +130,44 @@ if __name__ == "__main__":
 
     print('Unlock the arm and place it on the middle of the paper')
     input("Press enter to continue...")
-    centre_pos = testbot.interface.get_pose()
+    center = testbot.interface.get_pose()
 
     print_position()
 
-    print("moving to relative position x + 10")
-    testbot.move_to_relative(10, 0, 0, 0)
-    print_position()
+    testbot.move_to_relative(0, 0, 10, 0)
+    print('Ready to draw')
 
-    print("slide joints to relative position j1 + 10")
-    testbot.slide_to_relative(10, 0, 0, 0)
-    print_position()
+    testbot.move_to_relative(0, 0, -10, 0)
 
-    print('move to an absolute cartesian position - original centre')
-    x, y, z, r = centre_pos[0], centre_pos[1], centre_pos[2], centre_pos[3]
-    testbot.move_to(x, y, z, r)
+    testbot.interface.set_continous_trajectory_params(200, 200, 200)
 
-    print('move to an absolute cartesian position - original centre pen up')
-    x, y, z, r = centre_pos[0], centre_pos[1], centre_pos[2], centre_pos[3]
-    testbot.move_to(x, y, z + 5, r)
+    # Draw circle
+    path = []
+    steps = 24
+    scale = 50
+    for i in range(steps + 2):
+        x = math.cos(((math.pi * 2) / steps) * i)
+        y = math.sin(((math.pi * 2) / steps) * i)
+
+        path.append([center[0] + x * scale, center[1] + y * scale, center[2]])
+    testbot.follow_path(path)
+
+    # Move up and then back to the start
+    testbot.move_to_relative(0, 0, 10, 0)
+    testbot.slide_to(center[4], center[5], center[6], center[7])
+    # print("moving to relative position x + 10")
+    # testbot.move_to_relative(10, 0, 0, 0)
+    # print_position()
+    #
+    # print("slide joints to relative position j1 + 10")
+    # testbot.slide_to_relative(10, 0, 0, 0)
+    # print_position()
+    #
+    # print('move to an absolute cartesian position - original centre')
+    # x, y, z, r = centre_pos[0], centre_pos[1], centre_pos[2], centre_pos[3]
+    # testbot.move_to(x, y, z, r)
+    #
+    # print('move to an absolute cartesian position - original centre pen up')
+    # x, y, z, r = centre_pos[0], centre_pos[1], centre_pos[2], centre_pos[3]
+    # testbot.move_to(x, y, z + 5, r)
 

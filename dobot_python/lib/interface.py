@@ -22,11 +22,12 @@ class Interface:
     def send(self, message):
         self.lock.acquire()
         if self.verbose:
-            print(f'INTERFACE: {message.package()}')
+            print(f'DOBOT SEND: {message.package()}')
         self.serial.write(message.package())
         self.serial.flush()
         response = Message.read(self.serial)
-        # print(f"DOBOT RESPONSE: {response.params}")
+        # if self.verbose:
+        #     print(f"DOBOT RESPONSE: {response.params}")
         self.lock.release()
         return response.params
 
