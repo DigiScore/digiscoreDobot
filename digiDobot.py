@@ -176,23 +176,25 @@ class Digidobot:
     def print_position(self, position):
         print(f'Centre position (x, y, z, r): {position[0:4]}')
 
-    def move_to_rel(self, new_relative_pos: tuple, wait: bool = True):
-        """move the pen head to a relative position x, y,
+    def move_to_rel_xyz(self, new_relative_pos: tuple, wait: bool = True):
+        """move the pen head to a relative position x, y, z
         from current position"""
         self.bot.move_to_relative(new_relative_pos[0],
                                   new_relative_pos[1],
-                                  0, 0,
+                                  new_relative_pos[2],
+                                  0,
                                   wait=wait)
 
-    def slide_to_rel(self, new_relative_pos: tuple, wait: bool = True):
-        """Slide to a relative coordinate x, y,
+    def slide_to_rel_xyz(self, new_relative_pos: tuple, wait: bool = True):
+        """Slide to a relative coordinate x, y, z
         shortest possible path"""
         self.bot.slide_to_relative(new_relative_pos[0],
                                    new_relative_pos[1],
-                                   0, 0,
+                                   new_relative_pos[2],
+                                   0,
                                    wait=wait)
 
-    def move_to(self, new_pos: tuple, wait: bool = True):
+    def move_to_xyzr(self, new_pos: tuple, wait: bool = True):
         """move the pen head to a cartesian position x, y, z, r
                 from current position"""
         x, y, z, r = new_pos[0], \
@@ -201,7 +203,7 @@ class Digidobot:
                      new_pos[3]
         self.bot.move_to(x, y, z, r)
 
-    def slide_to(self, new_pos: tuple, wait: bool = True):
+    def slide_to_xyzr(self, new_pos: tuple, wait: bool = True):
         """move the pen head to a cartesian position x, y, z, r
                 from current position quickly. Used for rapid movement"""
         x, y, z, r = new_pos[0], \
@@ -300,7 +302,7 @@ class Digidobot:
 
     def circle(self, size: float = 5,
                drawing: bool = True,
-               wait: bool = True):
+               wait: bool = False):
         """draws a circle at the current position.
         Default is 3 pixels diameter.
         Args:
@@ -322,7 +324,9 @@ class Digidobot:
             path.append([center[0] + x * scale, center[1] + y * scale, center[2]])
             # else:
                 # path.append([center[0] + x * scale, center[1] + y * scale, center[2] - 5])
+
         self.bot.follow_path(path, wait=wait)
+
         # if drawing:
         #     self.pen_ready(False)
 
@@ -343,14 +347,14 @@ class Digidobot:
         # goto start position for line draw, without pen
         x1, y1, z1, r1 = stave_start_pos[:4]
         x2, y2, z2, r2 = stave_end_pos[:4]
-        self.slide_to((x1, y1, z1, r1))
+        self.slide_to_xyzr((x1, y1, z1, r1))
 
         # draw a line/ stave
         input('Insert pen, then press enter')
-        self.move_to((x2, y2, z2, r2))
+        self.move_to_xyzr((x2, y2, z2, r2))
 
         # goto standby position
-        self.move_to((250, -210, 20, 0))
+        self.move_to_xyzr((250, -210, 20, 0))
 
     def alarms(self, alarm_response):
         alarms = []
@@ -386,7 +390,7 @@ if __name__ == "__main__":
     old_value = 0
     start_time = time()
     end_time = start_time + duration_of_piece
-    sub_division_of_duration = duration_of_piece / 420
+    sub_division_of_duration = 420 / duration_of_piece
 
     def move_y():
         # move y along a bit
@@ -399,23 +403,26 @@ if __name__ == "__main__":
         print(f'old y = {nowy}, move to = {nowy + current_y_delta}')
         if 200 <= nowx <= 300:
             nowx = 250
-        digibot.slide_to((nowx, nowy + current_y_delta, 0, nowr))
+        digibot.slide_to_xyzr((nowx, nowy + current_y_delta, 0, nowr))
 
     def rnd(power_of_command):
-        # # movement + or - (random)
-        # if getrandbits(1):
-        #     posneg = 1
-        # else:
-        #     posneg = -1
-        #
-        # # multiplication factor
-        # if getrandbits(1):
-        #     multiplication_factor = randrange(power_of_command) + 1
-        # else:
-        #     multiplication_factor = 1
+        # movement + or - (random)
+        if getrandbits(1):
+            posneg = 1
+        else:
+            posneg = -1
+
+        # multiplication factor
+        if getrandbits(1):
+            multiplication_factor = randrange(3, 6) + power_of_command
+        else:
+            multiplication_factor = 5
+
         # return (random() + multiplication_factor) * posneg
 
-        return 5
+        result = multiplication_factor * posneg
+        print(f'                Random number = {result}')
+        return result
 
     command_list = ["circle",
                         "squiggle",
@@ -429,6 +436,8 @@ if __name__ == "__main__":
                         "slide to relative"]
 
     while time() < end_time:
+        move_y()
+
         incoming_command = randrange(10)
         # # randomly draw or move
         # if getrandbits(1):
@@ -443,23 +452,29 @@ if __name__ == "__main__":
         #     wait = True
 
 
-        print(incoming_command)
+        print("random command = ", incoming_command)
 
         # low power response from AI Factory
         if incoming_command < 3:
             # self.digibot.pen_ready(False)
+            print(f'DOBOT: {incoming_command}: draw command = "slide to relative", ')
+
             digibot.move_to_rel((rnd(2), rnd(2)))
             # print result
-            print(f'DOBOT: {incoming_command}: draw command = "slide to relative", ')
+            # print(f'DOBOT: {incoming_command}: draw command = "slide to relative", ')
 
         # Mid power response from AI Factory
         elif 3 <= incoming_command < 8:
             # self.digibot.pen_ready(True)
             incoming_command = randrange(10)
             print('random choice = ', incoming_command)
+            print(f'DOBOT: {incoming_command}: draw command = {command_list[incoming_command]}, drawing=True, wait=True')
+
 
             if incoming_command == 0:
-                digibot.circle()
+                scale = randrange(5, 20)
+                print('circle radius = ', scale)
+                digibot.circle(scale)
 
             elif incoming_command == 1:
                 squiggle_list = (rnd(incoming_command),
@@ -469,11 +484,12 @@ if __name__ == "__main__":
                 digibot.squiggle([squiggle_list])
 
             elif incoming_command == 2:
-                digibot.circle_arc(5,
-                                        [(rnd(incoming_command),
-                                          rnd(incoming_command),
-                                          rnd(incoming_command))
-                                         ])
+                # digibot.circle_arc(rnd(incoming_command),
+                #                         [(rnd(incoming_command),
+                #                           rnd(incoming_command),
+                #                           rnd(incoming_command))
+                #                          ])
+                pass
 
             elif incoming_command == 3:
                 digibot.move_to_rel((rnd(incoming_command),
@@ -483,26 +499,29 @@ if __name__ == "__main__":
                 digibot.dot()
 
             elif incoming_command == 5:
-                digibot.circle_line(5,
-                                    (rnd(incoming_command), rnd(incoming_command)
-                                          ))
+                pass
+                # digibot.circle_line(rnd(incoming_command),
+                #                     (rnd(incoming_command), rnd(incoming_command)
+                #                           ))
             elif incoming_command == 6:
                 digibot.line((rnd(incoming_command),
                                    rnd(incoming_command)
                                    ))
 
             elif incoming_command == 7:
-                digibot.circle(5)
+                # digibot.circle(rnd(incoming_command))
+                pass
 
             else:
                 digibot.move_to_rel((rnd(incoming_command),
                                            rnd(incoming_command)
                                            ))
-            print(f'DOBOT: {incoming_command}: draw command = {command_list[incoming_command]}, drawing=True, wait=True')
+            # print(f'DOBOT: {incoming_commandming_command}: draw command = {command_list[incoming_command]}, drawing=True, wait=True')
 
         # High power emission
         elif incoming_command >= 8:
             # self.digibot.pen_ready(True)
+            print(f'DOBOT: {incoming_command}: draw command = "Squiggle", drawing=True, wait=True')
             squiggle_list = []
             for n in range(randrange(2, 4)):
                 squiggle_list.append((rnd(incoming_command),
@@ -510,9 +529,8 @@ if __name__ == "__main__":
                                       rnd(incoming_command)))
             digibot.squiggle(squiggle_list)
 
-            print(f'DOBOT: {incoming_command}: draw command = "Squiggle", drawing=True, wait=True')
+            # print(f'DOBOT: {incoming_command}: draw command = "Squiggle", drawing=True, wait=True')
 
-        move_y()
 
         sleep(1)
 

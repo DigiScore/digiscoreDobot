@@ -11,6 +11,7 @@ from dobot_python.lib.interface import Interface
 class Dobot:
     def __init__(self, port, verbose: bool = False):
         self.interface = Interface(port, verbose=verbose)
+        self.interface.clear_alarms_state()
 
         self.interface.stop_queue(True)
         self.interface.clear_queue()
@@ -89,7 +90,9 @@ class Dobot:
             if self.interface.get_current_queue_index() > queue_index:
                 break
 
-            # sleep(0.5)
+            sleep(0.5)
+        self.interface.wait(0)
+
 
     # Move according to the given path
     def follow_path(self, path, wait=True):
