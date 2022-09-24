@@ -45,7 +45,10 @@ def move_y():
     digibot.move_to(nowx, newy, 0, nowr)
 
 def rnd():
-    return randrange(1, 10)
+    pos = 1
+    if getrandbits(1):
+        pos = -1
+    return randrange(1, 25) * pos
 
 while time() < end_time:
     print('move y')
@@ -54,8 +57,8 @@ while time() < end_time:
     if getrandbits(1):
         if getrandbits(1):
             digibot.squiggle([(rnd(), rnd(), rnd())])
-        else:
-            digibot.circle(rnd())
+        # else:
+        #     digibot.circle(rnd())
 
 digibot.close()
 
