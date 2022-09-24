@@ -6,7 +6,7 @@ import pyaudio
 import numpy as np
 import logging
 
-from digiDobot import Digidobot
+from OLD_digiDobot import Digidobot
 
 class DrawBot:
     def __init__(self, duration_of_piece: int = 120):

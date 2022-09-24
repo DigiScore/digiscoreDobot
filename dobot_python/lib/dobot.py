@@ -91,7 +91,7 @@ class Dobot:
                 break
 
             sleep(0.5)
-        self.interface.wait(0)
+        # self.interface.wait(0)
 
 
     # Move according to the given path
