@@ -7,7 +7,8 @@ from time import time, sleep
 from serial.tools import list_ports
 from digibot import Digibot
 
-digibot = Digibot(verbose=True)
+digibot = Digibot(verbose=False)
+digibot.draw_stave()
 
 (x, y, z, r, j1, j2, j3, j4) = digibot.pose()
 print(f'x:{x} y:{y} z:{z} j1:{j1} j2:{j2} j3:{j3} j4:{j4}')
@@ -43,13 +44,18 @@ def move_y():
         nowx = 250
     digibot.move_to(nowx, newy, 0, nowr)
 
+def rnd():
+    return randrange(1, 10)
 
 while time() < end_time:
     print('move y')
     move_y()
 
-    # if getrandbits(1):
-    #     digibot.go
+    if getrandbits(1):
+        if getrandbits(1):
+            digibot.squiggle([(rnd(), rnd(), rnd())])
+        else:
+            digibot.circle(rnd())
 
 digibot.close()
 

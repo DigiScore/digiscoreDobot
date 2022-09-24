@@ -47,9 +47,7 @@ class Digibot:
         input('waiting')
         self.bot.move_to_relative(0, 0, 10, 0)
 
-    def squiggle(self, arc_list: list,
-                 drawing: bool = True,
-                 queue: bool = True):
+    def squiggle(self, arc_list: list):
         """accepts a list of tuples that define a sequence of
         x, y deltas to create a sequence of arcs that define a squiggle.
         list (circumference point, end point x, end point y):
@@ -66,10 +64,13 @@ class Digibot:
             x += dx
             y += dy
 
+    def circle(self, size:int = 5):
+        self.bot.circle(size)
+
     def pose(self):
         return self.bot.pose()
 
-    def move_to(self, x, y, z, r, wait=False):
+    def move_to(self, x, y, z, r, wait=True):
         self.bot.move_to(x, y, z, r, wait)
 
     def home(self):
@@ -87,7 +88,9 @@ if __name__ == "__main__":
     (x, y, z, r, j1, j2, j3, j4) = digibot.pose()
     print(f'x:{x} y:{y} z:{z} j1:{j1} j2:{j2} j3:{j3} j4:{j4}')
 
-    digibot.squiggle([5, 5, 5])
+    digibot.squiggle([(5, 5, 5)])
+
+    digibot.circle(20)
 
 
     #
