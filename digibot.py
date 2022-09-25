@@ -22,6 +22,9 @@ class Digibot:
         # initiate dobot and connect
         self.bot = pydobot.Dobot(port=port, verbose=verbose)
 
+        # make a shared list/ dict
+        self.draw_list = []
+
         print('locating home')
         self.home()
         input('remove pen, then press enter')
@@ -73,11 +76,17 @@ class Digibot:
     def move_to(self, x, y, z, r, wait=True):
         self.bot.move_to(x, y, z, r, wait)
 
+    def move_to_relative(self, x, y, z, r, wait=True):
+        self.bot.move_to_relative( x, y, z, r, wait)
+
     def home(self):
         self.bot.home()
 
     def close(self):
         self.bot.close()
+
+    def clear_alarms(self):
+        self.bot.clear_alarms()
 
 if __name__ == "__main__":
     digibot = Digibot(verbose=False)

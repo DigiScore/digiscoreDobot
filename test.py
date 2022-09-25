@@ -19,7 +19,7 @@ print(f'x:{x} y:{y} z:{z} j1:{j1} j2:{j2} j3:{j3} j4:{j4}')
 # digibot.move_to(x, y, z, r, wait=True)
 
 # start operating vars
-duration_of_piece = 60  # seconds
+duration_of_piece = 480  # seconds
 running = True
 old_value = 0
 start_time = time()
@@ -31,36 +31,46 @@ def move_y():
     elapsed = time() - start_time
 
     # NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
-    newy = (((elapsed - 0) * (210 - -210)) / (60 - 0)) + -210
+    newy = (((elapsed - 0) * (210 - -210)) / (duration_of_piece - 0)) + -210
 
     # current_y_delta = elapsed * sub_division_of_duration
-    position_list = digibot.pose()
+    (x, y, z, r, j1, j2, j3, j4) = digibot.pose()
     print(f'x:{x} y:{y} z:{z} j1:{j1} j2:{j2} j3:{j3} j4:{j4}')
 
-    nowx, nowy, nowz, nowr = position_list[:4]
+    # lift up pen
+    digibot.move_to_relative(0, 0, 5, 0)
     print('elapsed time = ', elapsed)
-    print(f'old y = {nowy}, move to = {newy}')
-    if 200 <= nowx <= 300:
-        nowx = 250
-    digibot.move_to(nowx, newy, 0, nowr)
+    print(f'old y = {y}, move to = {newy}')
+    if x <= 200 or x >= 300:
+        x = 250
+    digibot.move_to(x, newy, 0, r, False)
+    # digibot.move_to_relative(0, 0, -5, 0)
 
-def rnd():
+def rnd(power):
     pos = 1
     if getrandbits(1):
         pos = -1
-    return randrange(1, 25) * pos
+    return (randrange(1, 5) + power) * pos
 
+# todo - move to an emmission system like Fabrizio's score
 while time() < end_time:
-    print('move y')
-    move_y()
+    # move_y()
+    digibot.clear_alarms()
 
     if getrandbits(1):
+        power = randrange(1, 10)
         if getrandbits(1):
-            digibot.squiggle([(rnd(), rnd(), rnd())])
-        # else:
-        #     digibot.circle(rnd())
+            digibot.squiggle([(rnd(power), rnd(power), rnd(power))])
+        else:
+            digibot.move_to_relative(rnd(power), rnd(power), 0, 0, True)
+    else:
+        print('move y')
+        move_y()
+
+    sleep(0.2)
 
 digibot.close()
+
 
 
 
