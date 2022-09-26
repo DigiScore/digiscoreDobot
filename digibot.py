@@ -34,8 +34,8 @@ class Digibot:
         Has optional function to draw multiple staves.
         Args:
             staves: number of lines to draw. Default = 1"""
-        stave_start_pos = (250, 210, 0, 0)
-        stave_end_pos = (250, -210, 0, 0)
+        stave_start_pos = (250, 175, 0, 0)
+        stave_end_pos = (250, -175, 0, 0)
 
         # goto start position for line draw, without pen
         x1, y1, z1, r1 = stave_start_pos[:4]
@@ -66,9 +66,17 @@ class Digibot:
             self.bot.go_arc(x + circumference, y, z, r, x + dx, y + dy, z, r)
             x += dx
             y += dy
+            sleep(0.2)
+
+    def arc(self, x, y, z, r, cir_x, cir_y, cir_z, cir_r, wait):
+        self.bot.go_arc(x, y, z, r, cir_x, cir_y, cir_z, cir_r, wait)
 
     def circle(self, size:int = 5):
         self.bot.circle(size)
+
+    def speed(self, velocity=200, acceleration=200):
+        self.bot._set_ptp_coordinate_params(velocity=velocity,
+                                            acceleration=acceleration)
 
     def pose(self):
         return self.bot.pose()
@@ -76,8 +84,14 @@ class Digibot:
     def move_to(self, x, y, z, r, wait=True):
         self.bot.move_to(x, y, z, r, wait)
 
+    def jump_to(self, x, y, z, r, wait=True):
+        self.bot.jump_to(x, y, z, r, wait)
+
     def move_to_relative(self, x, y, z, r, wait=True):
         self.bot.move_to_relative( x, y, z, r, wait)
+
+    def joint_move_to(self, j1, j2, j3, j4, wait=True):
+        self.bot.joint_move_to(j1, j2, j3, j4, wait)
 
     def home(self):
         self.bot.home()

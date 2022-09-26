@@ -18,13 +18,15 @@ def rnd(power):
     return (randrange(1, 5) + power) * pos
 
 def process_list():
-    if len(digibot.draw_list) >= 1:
+    if len(digibot.draw_list):
         draw_dict = digibot.draw_list.pop()[0]
         if draw_dict['type'] == "squiggle":
             pass
         elif draw_dict['type'] == 'move':
             pass
         elif draw_dict['type'] == 'line':
+            pass
+        elif draw_dict['type'] == 'swing':
             pass
 
     else:
