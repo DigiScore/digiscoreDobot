@@ -10,6 +10,18 @@ from digibot import Digibot
 digibot = Digibot(verbose=False)
 digibot.draw_stave()
 
+mode = 1
+if mode == 1:
+    mode_type = "draw"
+else:
+    mode_type = "co-create"
+
+print(f'mode = {mode_type}')
+"""
+draw mode uses continuous line like Cardew
+co-create mode, is like Wolff's piece
+"""
+
 (x, y, z, r, j1, j2, j3, j4) = digibot.pose()
 print(f'x:{x} y:{y} z:{z} j1:{j1} j2:{j2} j3:{j3} j4:{j4}')
 
@@ -46,7 +58,9 @@ def move_y():
     print(f'old y = {y}, move to = {newy}')
     if x <= 200 or x >= 300:
         x = 250
-    digibot.move_to(x, newy, 0, r, True)
+    if mode == 1:
+        digibot.jump_to(x, newy, 0, r, True)
+
     # digibot.move_to_relative(0, 0, -5, 0)
     # return (x, y, z)
 
@@ -68,8 +82,8 @@ while time() < end_time:
 
 
     power = randrange(1, 10)
-    print('move y')
-    move_y()
+    # print('move y')
+    # move_y()
 
     (x, y, z, r, j1, j2, j3, j4) = digibot.pose()
     print(f'x:{x} y:{y} z:{z} j1:{j1} j2:{j2} j3:{j3} j4:{j4}')
@@ -82,6 +96,11 @@ while time() < end_time:
 
     randchoice = randrange(4)
     print(f'randchoice == {randchoice}')
+
+    # move y
+    if randchoice == 0:
+        print('move y')
+        move_y()
 
     # messy squiggle
     if randchoice <= 1:

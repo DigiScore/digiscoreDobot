@@ -46,9 +46,9 @@ class Digibot:
         input('Insert pen, then press enter')
         self.bot.move_to(x2, y2, z2, r2)
 
-        # goto standby position
-        input('waiting')
-        self.bot.move_to_relative(0, 0, 10, 0)
+        # # goto standby position
+        # self.bot.move_to_relative(0, 0, 10, 0)
+        # input('waiting')
 
     def squiggle(self, arc_list: list):
         """accepts a list of tuples that define a sequence of
