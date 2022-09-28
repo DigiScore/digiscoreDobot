@@ -9,13 +9,17 @@ import logging
 from digibot import Digibot
 
 class DrawBot:
-    def __init__(self, duration_of_piece: int = 120):
+    def __init__(self, duration_of_piece: int = 120,
+                 continuous_line: bool = True):
         # start dobot
         self.digibot = Digibot(verbose=False)
         self.digibot.draw_stave()
+        self.digibot.go_position_ready()
+
         # reset speed
         self.digibot.speed(velocity=100, acceleration=100)
         self.dobot_commands_queue = []
+
 
         # start Nebula
         self.nebula = Nebula(speed=1)
@@ -33,7 +37,7 @@ class DrawBot:
 
         # start operating vars
         self.duration_of_piece = duration_of_piece
-        self.continuous_line = False
+        self.continuous_line = continuous_line
         self.running = True
         self.old_value = 0
         self.start_time = time()
@@ -82,6 +86,7 @@ class DrawBot:
 
     def terminate(self):
         print('TERMINATING')
+        self.digibot.go_position_end()
         self.running = False
         self.digibot.close()
 
@@ -92,20 +97,6 @@ class DrawBot:
         result = (randrange(1, 5) + power_of_command) * pos
         print(f'Rnd result = {result}')
         return result
-
-        # # movement + or - (random)
-        # if getrandbits(1):
-        #     posneg = 1
-        # else:
-        #     posneg = -1
-        #
-        # # multiplication factor
-        # if getrandbits(1):
-        #     multiplication_factor = randrange(1, power_of_command)
-        # else:
-        #     multiplication_factor = 1
-        # return (random() + multiplication_factor) * posneg
-
 
     def move_y(self):
         # move y along a bit
@@ -180,7 +171,7 @@ class DrawBot:
                 self.digibot.clear_alarms()
 
                 # move Y
-                # self.move_y()
+                self.move_y()
 
                 # get speed
                 self.digibot.speed(velocity=incoming_command * 10,
@@ -190,7 +181,7 @@ class DrawBot:
                 print(f'x:{x} y:{y} z:{z} j1:{j1} j2:{j2} j3:{j3} j4:{j4}')
 
                 # low power response from AI Factory
-                if incoming_command < 4:
+                if incoming_command < 3:
                     # self.digibot.pen_ready(False)
                     # self.digibot.slide_to_rel((self.rnd(2), self.rnd(2)))
                     # # print result
@@ -199,13 +190,14 @@ class DrawBot:
                     #                      y + self.rnd(incoming_command),
                     #                      0, 0,
                     #                      True)
-                    self.move_y_random()
-
-                    # squiggle_list = (self.rnd(incoming_command),
-                    #                  self.rnd(incoming_command),
-                    #                  self.rnd(incoming_command)
-                    #                  )
-                    # self.digibot.squiggle([squiggle_list])
+                    if getrandbits(1):
+                        self.move_y_random()
+                    else:
+                        squiggle_list = (self.rnd(incoming_command),
+                                         self.rnd(incoming_command),
+                                         self.rnd(incoming_command)
+                                         )
+                        self.digibot.squiggle([squiggle_list])
 
                 # high power response from AI Factory
                 elif incoming_command >= 7:
@@ -266,6 +258,6 @@ class DrawBot:
 
 
 if __name__ == "__main__":
-    drawbot = DrawBot(duration_of_piece=240)
+    drawbot = DrawBot(duration_of_piece=240, continuous_line=False)
 
 

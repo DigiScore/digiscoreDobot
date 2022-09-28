@@ -24,6 +24,8 @@ class Digibot:
 
         # make a shared list/ dict
         self.draw_list = []
+        self.ready_position = [250, -175, 20, 0]
+        self.end_position = (250, 175, 20, 0)
 
         print('locating home')
         self.home()
@@ -78,6 +80,14 @@ class Digibot:
         self.bot._set_ptp_coordinate_params(velocity=velocity,
                                             acceleration=acceleration)
 
+    def go_position_ready(self):
+        x, y, z, r = self.ready_position[:4]
+        self.bot.move_to(x, y, z, r)
+
+    def go_position_end(self):
+        x, y, z, r = self.end_position[:4]
+        self.bot.move_to(x, y, z, r)
+
     def pose(self):
         return self.bot.pose()
 
@@ -114,43 +124,5 @@ if __name__ == "__main__":
     digibot.squiggle([(5, 5, 5)])
 
     digibot.circle(20)
-
-
-    #
-    # print('test wiggle')
-    # digibot.move_to(x + 20, y, z, r, wait=True)
-    # # device.wait(1000)
-    # digibot.move_to(x, y, z, r, wait=True)
-    #
-    # # start operating vars
-    # duration_of_piece = 60  # seconds
-    # running = True
-    # old_value = 0
-    # start_time = time()
-    # end_time = start_time + duration_of_piece
-    #
-    #
-    # def move_y():
-    #     # move y along a bit
-    #     elapsed = time() - start_time
-    #
-    #     # NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
-    #     newy = (((elapsed - 0) * (210 - -210)) / (60 - 0)) + -210
-    #
-    #     # current_y_delta = elapsed * sub_division_of_duration
-    #     position_list = digibot.pose()
-    #     print(f'x:{x} y:{y} z:{z} j1:{j1} j2:{j2} j3:{j3} j4:{j4}')
-    #
-    #     nowx, nowy, nowz, nowr = position_list[:4]
-    #     print('elapsed time = ', elapsed)
-    #     print(f'old y = {nowy}, move to = {newy}')
-    #     if 200 <= nowx <= 300:
-    #         nowx = 250
-    #     digibot.move_to(nowx, newy, 0, nowr)
-    #
-    #
-    # while time() < end_time:
-    #     print('move y')
-    #     move_y()
 
     digibot.close()
