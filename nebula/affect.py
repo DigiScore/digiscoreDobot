@@ -40,7 +40,7 @@ class Affect:
 
         # Emission list is the highest level comms back to client
         # self.emission_list = []
-        self.live_emission_data = 0.0
+        self.live_emission_data = 1
 
         # little val for emission control avoiding repeated vals (see below)
         self.old_val = 0
