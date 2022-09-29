@@ -251,13 +251,13 @@ class DrawBot:
                     self.digibot.squiggle(squiggle_list)
                     # print(f'DOBOT: {incoming_command}: draw command = "Squiggle", drawing=True, wait=True')
 
-                sleep(0.2)
+                sleep(0.4)
 
             else:
                 sleep(0.2)
 
 
 if __name__ == "__main__":
-    drawbot = DrawBot(duration_of_piece=240, continuous_line=False)
+    drawbot = DrawBot(duration_of_piece=240, continuous_line=True)
 
 
