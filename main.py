@@ -43,22 +43,12 @@ class DrawBot:
         self.start_time = time()
         self.end_time = self.start_time + duration_of_piece
 
-        # get y-creep sub-division e.g. 420 points across
-        # the y-stave, divided by time in seconds
-        # self.duration = duration_of_piece
-        # self.sub_division_of_duration = duration_of_piece / 420
-        # print('sub division = ', self.sub_division_of_duration)
-
         # start the bot listening and drawing
-        # while time() < end_time:
         listener_thread = Thread(target=self.director)
         dobot_thread = Thread(target=self.dobot_control)
-        # draw_thread = Thread(target=self.dobot_commands)
 
         listener_thread.start()
         dobot_thread.start()
-        # draw_thread.start()
-        # listener_thread.join()
 
     def director(self):
         print("Starting mic listening stream & thread")
@@ -80,9 +70,6 @@ class DrawBot:
 
             # put normalised amplitude into Nebula's dictionary for use
             self.nebula.user_input(normalised_peak)
-
-            # # get live emission from Nebula (not list)
-            # self.nebula_emission_val = self.nebula.live_emission_data
 
     def terminate(self):
         print('TERMINATING')
@@ -149,8 +136,6 @@ class DrawBot:
     def dobot_control(self):
         print("Started dobot control thread")
 
-        # todo - constant movement across page y from 210 -> -210
-        # todo - healthchecker here inc position check and righting
         while self.running:
             # check end of duration
             if time() > self.end_time:
@@ -182,14 +167,6 @@ class DrawBot:
 
                 # low power response from AI Factory
                 if incoming_command < 3:
-                    # self.digibot.pen_ready(False)
-                    # self.digibot.slide_to_rel((self.rnd(2), self.rnd(2)))
-                    # # print result
-                    # print(f'DOBOT: {incoming_command}: draw command = "move to relative", wait=False')
-                    # self.digibot.move_to(x + self.rnd(incoming_command),
-                    #                      y + self.rnd(incoming_command),
-                    #                      0, 0,
-                    #                      True)
                     if getrandbits(1):
                         self.move_y_random()
                     else:
@@ -221,8 +198,6 @@ class DrawBot:
                                                  )
                         self.digibot.squiggle(squiggle_list)
 
-                        # digibot.squiggle([(randrange(1, 5), randrange(1, 5), randrange(1, 5))])
-
                     # line to somewhere
                     elif randchoice == 2:
                         self.digibot.move_to(x + self.rnd(incoming_command),
@@ -249,7 +224,6 @@ class DrawBot:
                                               randrange(-5, 5))
                                              )
                     self.digibot.squiggle(squiggle_list)
-                    # print(f'DOBOT: {incoming_command}: draw command = "Squiggle", drawing=True, wait=True')
 
                 sleep(0.4)
 
@@ -259,5 +233,4 @@ class DrawBot:
 
 if __name__ == "__main__":
     drawbot = DrawBot(duration_of_piece=240, continuous_line=True)
-
 
