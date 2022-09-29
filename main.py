@@ -45,10 +45,10 @@ class DrawBot:
                                   frames_per_buffer=self.CHUNK)
 
         # start operating vars
+        logging.basicConfig(level=logging.INFO)
         self.duration_of_piece = duration_of_piece
         self.continuous_line = continuous_line
         self.running = True
-        self.logging = False
         self.old_value = 0
         self.start_time = time()
         self.end_time = self.start_time + duration_of_piece
@@ -74,8 +74,7 @@ class DrawBot:
 
             if peak > 2000:
                 bars = "#" * int(50 * peak / 2 ** 16)
-                if self.logging:
-                    print("MIC LISTENER: %05d %s" % (peak, bars))
+                logging.info("MIC LISTENER: %05d %s" % (peak, bars))
 
             # normalise it for range 0.0 - 1.0
             normalised_peak = ((peak - 0) / (20000 - 0)) * (1 - 0) + 0
@@ -100,8 +99,7 @@ class DrawBot:
         if getrandbits(1):
             pos = -1
         result = (randrange(1, 5) + power_of_command) * pos
-        if self.logging:
-            print(f'Rnd result = {result}')
+        logging.info(f'Rnd result = {result}')
         return result
 
     def move_y(self):
@@ -114,8 +112,7 @@ class DrawBot:
         (x, y, z, r, j1, j2, j3, j4) = self.digibot.pose()
         # NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
         newy = (((elapsed - 0) * (175 - -175)) / (self.duration_of_piece - 0)) + -175
-        if self.logging:
-            print(f'x:{x} y:{y} z:{z} j1:{j1} j2:{j2} j3:{j3} j4:{j4}')
+        logging.debug(f'x:{x} y:{y} z:{z} j1:{j1} j2:{j2} j3:{j3} j4:{j4}')
 
         # check x-axis is in range
         if x <= 200 or x >= 300:
@@ -136,8 +133,7 @@ class DrawBot:
         (x, y, z, r, j1, j2, j3, j4) = self.digibot.pose()
         # NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
         newy = (((elapsed - 0) * (175 - -175)) / (self.duration_of_piece - 0)) + -175
-        if self.logging:
-            print(f'x:{x} y:{y} z:{z} j1:{j1} j2:{j2} j3:{j3} j4:{j4}')
+        logging.debug(f'x:{x} y:{y} z:{z} j1:{j1} j2:{j2} j3:{j3} j4:{j4}')
 
         # check x-axis is in range
         if x <= 200 or x >= 300:
@@ -160,8 +156,7 @@ class DrawBot:
 
             # if the value has changed then ...
             if live_emission_data != self.old_value:
-                if self.logging:
-                    print(f"MAIN: emission value = {live_emission_data}")
+                logging.info(f"MAIN: emission value = {live_emission_data}")
                 self.old_value = live_emission_data
 
                 # multiply by 10 for local logic (power value)
@@ -178,8 +173,7 @@ class DrawBot:
                                    acceleration=incoming_command * 10)
 
                 (x, y, z, r, j1, j2, j3, j4) = self.digibot.pose()
-                if self.logging:
-                    print(f'Current position: x:{x} y:{y} z:{z} j1:{j1} j2:{j2} j3:{j3} j4:{j4}')
+                logging.debug(f'Current position: x:{x} y:{y} z:{z} j1:{j1} j2:{j2} j3:{j3} j4:{j4}')
 
                 # low power response from AI Factory
                 if incoming_command < 3:
@@ -197,8 +191,7 @@ class DrawBot:
                 # high power response from AI Factory
                 elif incoming_command >= 7:
                     randchoice = randrange(3)
-                    if self.logging:
-                        print(f'randchoice == {randchoice}')
+                    logging.debug(f'randchoice == {randchoice}')
 
                     # line to somewhere
                     if randchoice == 0:

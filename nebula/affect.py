@@ -4,6 +4,7 @@ from time import time
 from dataclasses import fields
 from random import random
 from time import sleep
+import logging
 
 # install Nebula modules
 from nebula.nebula_dataclass import NebulaDataClass
@@ -32,8 +33,9 @@ class Affect:
                             'self_awareness']
 
         # set running vars
-        self.affect_logging = False
+        # self.affect_logging = False
         self.running = True
+        logging.basicConfig(level=logging.INFO)
 
         # own the dataclass
         self.datadict = datadict
@@ -61,9 +63,8 @@ class Affect:
             master_cycle = randrange(600, 2600) / 100  # * self.global_speed
             loop_end = time() + master_cycle
 
-            if self.affect_logging:
-                print('\t\t\t\t\t\t\t\t=========AFFECT - Daddy cycle started ===========')
-                print(f"                 interrupt_listener: started! Duration =  {master_cycle} seconds")
+            logging.info('\t\t\t\t\t\t\t\t=========AFFECT - Daddy cycle started ===========')
+            logging.debug(f"                 interrupt_listener: started! Duration =  {master_cycle} seconds")
 
             # 2. child cycle: waiting for interrupt  from master clock
             while time() < loop_end:
@@ -75,22 +76,20 @@ class Affect:
                                         100) / 100  # round(((rhythm_rate / intensity) * self.global_speed), 2) # / 10  # rhythm_rate * self.global_speed
                 # self.datadict['rhythm_rate'] = rhythm_rate
                 setattr(self.datadict, 'rhythm_rate', rhythm_rate)
-                print(f'////////////////////////   rhythm rate = {rhythm_rate}')
+                logging.info(f'////////////////////////   rhythm rate = {rhythm_rate}')
 
                 # if a major break out then go to Daddy cycle and restart
                 if not self.interrupt_bang:
                     break
 
-                if self.affect_logging:
-                    print('\t\t\t\t\t\t\t\t=========Hello - child cycle 1 started ===========')
+                logging.debug('\t\t\t\t\t\t\t\t=========Hello - child cycle 1 started ===========')
 
                 # randomly pick an input stream for this cycle
                 # either user_in, random, net generation or self-awareness
                 rnd = randrange(4)
                 self.rnd_stream = self.affectnames[rnd]
                 setattr(self.datadict, 'affect_decision', self.rnd_stream)
-                if self.affect_logging:
-                    print(f'Random stream choice = {self.rnd_stream}')
+                logging.debug(f'Random stream choice = {self.rnd_stream}')
 
                 # hold this stream for 1-4 secs, unless interrupt bang
                 end_time = time() + (randrange(1000, 4000) / 1000)

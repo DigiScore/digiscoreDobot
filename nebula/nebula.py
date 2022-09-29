@@ -15,11 +15,9 @@ cvear@dmu.ac.uk
 Dedicated to Fabrizio Poltronieri
 """
 # import python modules
-from dataclasses import dataclass, fields
 from random import random, randrange
 from threading import Thread
-import tensorflow as tf
-import numpy as np
+import logging
 from time import sleep
 
 # import Nebula modules
@@ -60,15 +58,14 @@ class Nebula:
 
         # build the dataclass and fill with random number
         self.datadict = NebulaDataClass()
-        print(f'Data dict initial values are = {self.datadict}')
+        logging.debug(f'Data dict initial values are = {self.datadict}')
 
         # Build the AI factory and pass it the data dict
         self.AI_factory = AIFactory(self.datadict, speed)
 
         # Start affect listener
         self.affect = Affect(self.datadict)
-        # self.emission_list = self.affect.emission_list
-        # self.live_emission_data = self.affect.live_emission_data
+
 
     def director(self):
         """Starts the server/ AI threads
