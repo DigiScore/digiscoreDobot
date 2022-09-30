@@ -93,25 +93,21 @@ class Affect:
 
                 # hold this stream for 1-4 secs, unless interrupt bang
                 end_time = time() + (randrange(1000, 4000) / 1000)
-                if self.affect_logging:
-                    print('end time = ', end_time)
+                logging.debug('end time = ', end_time)
 
                 # 3. baby cycle - own time loops
                 while time() < end_time:
 
-                    if self.affect_logging:
-                        print('\t\t\t\t\t\t\t\t=========Hello - baby cycle 2 ===========')
+                    logging.info('\t\t\t\t\t\t\t\t=========Hello - baby cycle 2 ===========')
 
                     # make the master output the current value of the affect stream
                     # 1. go get the current value from dict
                     affect_listen = getattr(self.datadict, self.rnd_stream)
-                    if self.affect_logging:
-                        print(f'Affect stream current input value from {self.rnd_stream} == {affect_listen}')
+                    logging.debug(f'Affect stream current input value from {self.rnd_stream} == {affect_listen}')
 
                     # 2. send to Master Output
                     setattr(self.datadict, 'master_output', affect_listen)
-                    if self.affect_logging:
-                        print(f'\t\t ==============  master move output = {affect_listen}')
+                    logging.info(f'\t\t ==============  master move output = {affect_listen}')
 
                     # 3. emit to the client at various points in the affect cycle
                     self.emitter(affect_listen)
@@ -125,15 +121,13 @@ class Affect:
 
                     # 1. get current mic level
                     peak = getattr(self.datadict, "user_in")
-                    if self.affect_logging:
-                        print('testing current mic level for affect = ', peak)
+                    logging.debug('testing current mic level for affect = ', peak)
 
                     # 2. calc affect on behaviour
                     # LOUD
                     # if input stream is LOUD then smash a random fill and break out to Daddy cycle...
                     if peak > 0.8:
-                        if self.affect_logging:
-                            print('interrupt > HIGH !!!!!!!!!')
+                        logging.info('interrupt > HIGH !!!!!!!!!')
 
                         # A - refill dict with random
                         self.random_dict_fill()
@@ -147,8 +141,7 @@ class Affect:
                     # MEDIUM
                     # if middle loud fill dict with random, all processes norm
                     elif 0.3 < peak < 0.8:
-                        if self.affect_logging:
-                            print('interrupt MIDDLE -----------')
+                        logging.info('interrupt MIDDLE -----------')
 
                         # A. jumps out of current local loop, but not main one
                         break
@@ -156,11 +149,10 @@ class Affect:
                     # LOW
                     # nothing happens here
                     elif peak <= 0.3:
-                        if self.affect_logging:
-                            print('interrupt LOW ----------- no action')
+                        logging.info('interrupt LOW ----------- no action')
 
-                    # get current rhythm_rate from datadict
-                    rhythm_rate = getattr(self.datadict, 'rhythm_rate')
+                    # # get current rhythm_rate from datadict
+                    # rhythm_rate = getattr(self.datadict, 'rhythm_rate')
 
                     # and wait for a cycle
                     sleep(rhythm_rate)
@@ -176,7 +168,7 @@ class Affect:
             # self.emission_list.append(incoming_affect_listen)
             self.live_emission_data = incoming_affect_listen
             # if self.affect_logging:
-            print(f'AFFECT:                                EMITTING value {self.live_emission_data}')
+            logging.debug(f'AFFECT:                                EMITTING value {self.live_emission_data}')
         self.old_val = incoming_affect_listen
 
     def random_dict_fill(self):
@@ -186,8 +178,7 @@ class Affect:
             # print(field.name)
             rnd = random()
             setattr(self.datadict, field.name, rnd)
-        if self.affect_logging:
-            print(f'Data dict new random values are = {self.datadict}')
+        logging.debug(f'Data dict new random values are = {self.datadict}')
 
     def quit(self):
         self.running = False
