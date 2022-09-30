@@ -124,11 +124,19 @@ class DrawBot:
         if x <= 200 or x >= 300:
             x = 250
 
+        # move z (pen head) a little
+        if getrandbits(1):
+            z = 0
+        else:
+            z = randrange(-2, 2)
+
         # which mode
         if self.continuous_line:
-            self.digibot.move_to(x, newy, 0, r, True)
+            self.digibot.move_to(x, newy, z, r, True)
         else:
-            self.digibot.jump_to(x, newy, 0, r, True)
+            self.digibot.jump_to(x, newy, z, r, True)
+
+        logging.info(f'Move Y to x:{round(x)} y:{round(newy)} z:{round(z)}')
 
     def move_y_random(self):
         """Moves x and y pen position to nearly the true Y point."""
@@ -187,12 +195,14 @@ class DrawBot:
                     # does this or that
                     if getrandbits(1):
                         self.move_y_random()
+                        logging.info('Emission < 3: move Y random')
                     else:
                         squiggle_list = (self.rnd(incoming_command),
                                          self.rnd(incoming_command),
                                          self.rnd(incoming_command)
                                          )
                         self.digibot.squiggle([squiggle_list])
+                        logging.info('Emission < 3: squiggle')
 
                 # high power response from AI Factory
                 elif incoming_command >= 7:
@@ -203,8 +213,9 @@ class DrawBot:
                     if randchoice == 0:
                         self.digibot.move_to(x + self.rnd(incoming_command),
                                              y + self.rnd(incoming_command),
-                                             0, 0,
+                                             z, 0,
                                              True)
+                        logging.info('Emission >=7: draw line')
 
                     # big messy squiggles
                     if randchoice == 1:
@@ -215,16 +226,20 @@ class DrawBot:
                                                   randrange(-10, 10))
                                                  )
                         self.digibot.squiggle(squiggle_list)
+                        logging.info('Emission >=7: messy squiggle')
+
 
                     # arc/ circle
                     elif randchoice == 2:
                         self.digibot.arc(x + self.rnd(incoming_command),
                                          y + self.rnd(incoming_command),
-                                         0, 0,
+                                         z, 0,
                                          x + self.rnd(incoming_command),
                                          y + self.rnd(incoming_command),
-                                         0, 0,
+                                         z, 0,
                                          True)
+                        logging.info('Emission >=7: draw arc/ circle')
+
 
                 else:
                     # small squiggles
@@ -235,6 +250,7 @@ class DrawBot:
                                               randrange(-5, 5))
                                              )
                     self.digibot.squiggle(squiggle_list)
+                    logging.info('3 < Emission < 8: small squiggle')
 
                 # take a breath
                 sleep(0.4 / self.global_speed)

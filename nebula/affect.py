@@ -169,7 +169,7 @@ class Affect:
             # self.emission_list.append(incoming_affect_listen)
             self.live_emission_data = incoming_affect_listen
             # if self.affect_logging:
-            logging.info(f'AFFECT:                                EMITTING value {self.live_emission_data}')
+            logging.debug(f'AFFECT:                                EMITTING value {self.live_emission_data}')
         self.old_val = incoming_affect_listen
 
     def random_dict_fill(self):
