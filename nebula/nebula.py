@@ -46,7 +46,7 @@ class Nebula:
 
     Args:
         speed: general tempo/ feel of Nebula's response (0.5 ~ moderate fast, 1 ~ moderato; 2 ~ presto)"""
-
+    # todo = speed
     def __init__(self, speed=1):
         print('building engine server')
 
@@ -64,7 +64,7 @@ class Nebula:
         self.AI_factory = AIFactory(self.datadict, speed)
 
         # Start affect listener
-        self.affect = Affect(self.datadict)
+        self.affect = Affect(self.datadict, speed)
 
 
     def director(self):

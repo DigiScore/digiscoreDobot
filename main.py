@@ -18,9 +18,15 @@ class DrawBot:
     Args:
         duration_of_piece: the duration in seconds of the drawing
         continuous_line: Bool: True = will not jump between points
+        speed: int the dynamic tempo of the all processes. 1 = slow, 5 = fast
     """
     def __init__(self, duration_of_piece: int = 120,
-                 continuous_line: bool = True):
+                 continuous_line: bool = True,
+                 speed: int = 1):
+
+        # config logging for all modules
+        logging.basicConfig(level=logging.INFO)
+
         # start dobot communications
         self.digibot = Digibot(verbose=False)
         self.digibot.draw_stave()
@@ -28,10 +34,11 @@ class DrawBot:
 
         # reset speed
         self.digibot.speed(velocity=100, acceleration=100)
+        self.global_speed = speed
         self.dobot_commands_queue = []
 
         # start Nebula AI Factory
-        self.nebula = Nebula(speed=1)
+        self.nebula = Nebula(speed=speed)
         self.nebula.director()
 
         # set up mic listening funcs
@@ -45,7 +52,6 @@ class DrawBot:
                                   frames_per_buffer=self.CHUNK)
 
         # start operating vars
-        logging.basicConfig(level=logging.INFO)
         self.duration_of_piece = duration_of_piece
         self.continuous_line = continuous_line
         self.running = True
@@ -74,7 +80,7 @@ class DrawBot:
 
             if peak > 2000:
                 bars = "#" * int(50 * peak / 2 ** 16)
-                logging.info("MIC LISTENER: %05d %s" % (peak, bars))
+                logging.debug("MIC LISTENER: %05d %s" % (peak, bars))
 
             # normalise it for range 0.0 - 1.0
             normalised_peak = ((peak - 0) / (20000 - 0)) * (1 - 0) + 0
@@ -99,7 +105,7 @@ class DrawBot:
         if getrandbits(1):
             pos = -1
         result = (randrange(1, 5) + power_of_command) * pos
-        logging.info(f'Rnd result = {result}')
+        logging.debug(f'Rnd result = {result}')
         return result
 
     def move_y(self):
@@ -169,8 +175,8 @@ class DrawBot:
                 self.move_y()
 
                 # 3. get speed based on power of incoming value
-                self.digibot.speed(velocity=incoming_command * 10,
-                                   acceleration=incoming_command * 10)
+                self.digibot.speed(velocity=(incoming_command * 10) * self.global_speed,
+                                   acceleration=(incoming_command * 10) * self.global_speed)
 
                 (x, y, z, r, j1, j2, j3, j4) = self.digibot.pose()
                 logging.debug(f'Current position: x:{x} y:{y} z:{z} j1:{j1} j2:{j2} j3:{j3} j4:{j4}')
@@ -231,13 +237,13 @@ class DrawBot:
                     self.digibot.squiggle(squiggle_list)
 
                 # take a breath
-                sleep(0.4)
+                sleep(0.4 / self.global_speed)
 
             # wait a bit
             else:
-                sleep(0.4)
+                sleep(0.4 / self.global_speed)
 
 
 if __name__ == "__main__":
-    drawbot = DrawBot(duration_of_piece=240, continuous_line=True)
+    drawbot = DrawBot(duration_of_piece=240, continuous_line=True, speed=2)
 

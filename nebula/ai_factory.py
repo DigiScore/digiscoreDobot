@@ -1,7 +1,6 @@
-from dataclasses import dataclass, fields
-from random import random, randrange
-from threading import Thread
 # install python modules
+import logging
+from random import random, randrange
 import tensorflow as tf
 import numpy as np
 from time import sleep
@@ -64,6 +63,7 @@ class AIFactory:
         while self.running:
             # get the first rhythm rate from the datadict
             rhythm_rate = getattr(self.datadict, 'rhythm_rate')
+            rhythm_rate /= self.global_speed
 
             # PATCH BOARD - CROSS PLUGS NET OUTPUTS TO INPUTS
             # get input vars from dict (NB not always self)
@@ -73,24 +73,23 @@ class AIFactory:
             in_val4 = self.get_in_val(1)  # affect RNN as input
 
             # send in vals to net object for prediction
-            pred1 = self.move_net.predict(in_val1)
-            pred2 = self.affect_net.predict(in_val2)
-            pred3 = self.move_affect_net.predict(in_val3)
-            pred4 = self.affect_move_net.predict(in_val4)
+            pred1 = self.move_net.predict(in_val1, verbose=0)
+            pred2 = self.affect_net.predict(in_val2, verbose=0)
+            pred3 = self.move_affect_net.predict(in_val3, verbose=0)
+            pred4 = self.affect_move_net.predict(in_val4, verbose=0)
 
             # special case for self awareness stream
             self_aware_input = self.get_in_val(5)  # main movement as input
-            self_aware_pred = self.affect_perception.predict(self_aware_input)
+            self_aware_pred = self.affect_perception.predict(self_aware_input, verbose=0)
 
             # emits a stream of random poetry
             setattr(self.datadict, 'rnd_poetry', random())
 
-            if self.net_logging:
-                print(f"  'move_rnn' in: {in_val1} predicted {pred1}")
-                print(f"  'affect_rnn' in: {in_val2} predicted {pred2}")
-                print(f"  move_affect_conv2' in: {in_val3} predicted {pred3}")
-                print(f"  'affect_move_conv2' in: {in_val4} predicted {pred4}")
-                print(f"  'self_awareness' in: {self_aware_input} predicted {self_aware_pred}")
+            logging.debug(f"  'move_rnn' in: {in_val1} predicted {pred1}")
+            logging.debug(f"  'affect_rnn' in: {in_val2} predicted {pred2}")
+            logging.debug(f"  move_affect_conv2' in: {in_val3} predicted {pred3}")
+            logging.debug(f"  'affect_move_conv2' in: {in_val4} predicted {pred4}")
+            logging.debug(f"  'self_awareness' in: {self_aware_input} predicted {self_aware_pred}")
 
             # put predictions back into the dicts and master
             self.put_pred(0, pred1)

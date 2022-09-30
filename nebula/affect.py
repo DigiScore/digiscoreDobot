@@ -21,7 +21,8 @@ class Affect:
     percept, and duration of such listening."""
 
     def __init__(self,
-                 datadict: NebulaDataClass
+                 datadict: NebulaDataClass,
+                 speed: int = 1
                  ):
 
         print('Starting the Affect module')
@@ -35,7 +36,7 @@ class Affect:
         # set running vars
         # self.affect_logging = False
         self.running = True
-        logging.basicConfig(level=logging.INFO)
+        self.global_speed = speed
 
         # own the dataclass
         self.datadict = datadict
@@ -60,10 +61,10 @@ class Affect:
             self.interrupt_bang = True
 
             # Top level calc master cycle before a change
-            master_cycle = randrange(600, 2600) / 100  # * self.global_speed
+            master_cycle = (randrange(600, 2600) / 100)  * self.global_speed
             loop_end = time() + master_cycle
 
-            logging.info('\t\t\t\t\t\t\t\t=========AFFECT - Daddy cycle started ===========')
+            logging.debug('\t\t\t\t\t\t\t\t=========AFFECT - Daddy cycle started ===========')
             logging.debug(f"                 interrupt_listener: started! Duration =  {master_cycle} seconds")
 
             # 2. child cycle: waiting for interrupt  from master clock
@@ -72,11 +73,11 @@ class Affect:
                 intensity = getattr(self.datadict, 'self_awareness')
                 # print('////////////////////////   intensity = ', intensity)
 
-                rhythm_rate = randrange(30,
-                                        100) / 100  # round(((rhythm_rate / intensity) * self.global_speed), 2) # / 10  # rhythm_rate * self.global_speed
+                rhythm_rate = (randrange(30,
+                                        100) / 100) / self.global_speed  # round(((rhythm_rate / intensity) * self.global_speed), 2) # / 10  # rhythm_rate * self.global_speed
                 # self.datadict['rhythm_rate'] = rhythm_rate
                 setattr(self.datadict, 'rhythm_rate', rhythm_rate)
-                logging.info(f'////////////////////////   rhythm rate = {rhythm_rate}')
+                logging.debug(f'////////////////////////   rhythm rate = {rhythm_rate}')
 
                 # if a major break out then go to Daddy cycle and restart
                 if not self.interrupt_bang:
@@ -98,7 +99,7 @@ class Affect:
                 # 3. baby cycle - own time loops
                 while time() < end_time:
 
-                    logging.info('\t\t\t\t\t\t\t\t=========Hello - baby cycle 2 ===========')
+                    logging.debug('\t\t\t\t\t\t\t\t=========Hello - baby cycle 2 ===========')
 
                     # make the master output the current value of the affect stream
                     # 1. go get the current value from dict
@@ -107,7 +108,7 @@ class Affect:
 
                     # 2. send to Master Output
                     setattr(self.datadict, 'master_output', affect_listen)
-                    logging.info(f'\t\t ==============  master move output = {affect_listen}')
+                    logging.debug(f'\t\t ==============  master move output = {affect_listen}')
 
                     # 3. emit to the client at various points in the affect cycle
                     self.emitter(affect_listen)
@@ -127,7 +128,7 @@ class Affect:
                     # LOUD
                     # if input stream is LOUD then smash a random fill and break out to Daddy cycle...
                     if peak > 0.8:
-                        logging.info('interrupt > HIGH !!!!!!!!!')
+                        logging.debug('interrupt > HIGH !!!!!!!!!')
 
                         # A - refill dict with random
                         self.random_dict_fill()
@@ -141,7 +142,7 @@ class Affect:
                     # MEDIUM
                     # if middle loud fill dict with random, all processes norm
                     elif 0.3 < peak < 0.8:
-                        logging.info('interrupt MIDDLE -----------')
+                        logging.debug('interrupt MIDDLE -----------')
 
                         # A. jumps out of current local loop, but not main one
                         break
@@ -149,7 +150,7 @@ class Affect:
                     # LOW
                     # nothing happens here
                     elif peak <= 0.3:
-                        logging.info('interrupt LOW ----------- no action')
+                        logging.debug('interrupt LOW ----------- no action')
 
                     # # get current rhythm_rate from datadict
                     # rhythm_rate = getattr(self.datadict, 'rhythm_rate')
@@ -168,7 +169,7 @@ class Affect:
             # self.emission_list.append(incoming_affect_listen)
             self.live_emission_data = incoming_affect_listen
             # if self.affect_logging:
-            logging.debug(f'AFFECT:                                EMITTING value {self.live_emission_data}')
+            logging.info(f'AFFECT:                                EMITTING value {self.live_emission_data}')
         self.old_val = incoming_affect_listen
 
     def random_dict_fill(self):
