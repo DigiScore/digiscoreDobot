@@ -4,6 +4,7 @@ from random import random, randrange, getrandbits
 import pyaudio
 import numpy as np
 import logging
+from serial.tools import list_ports
 
 from digibot import Digibot
 from nebula.nebula import Nebula
@@ -28,7 +29,12 @@ class DrawBot:
         logging.basicConfig(level=logging.INFO)
 
         # start dobot communications
-        self.digibot = Digibot(verbose=False)
+        # find available ports and locate Dobot (-1)
+        available_ports = list_ports.comports()
+        print(f'available ports: {[x.device for x in available_ports]}')
+        port = available_ports[-1].device
+
+        self.digibot = Digibot(port=port, verbose=False)
         self.digibot.draw_stave()
         self.digibot.go_position_ready()
 
