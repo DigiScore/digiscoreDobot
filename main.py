@@ -98,11 +98,10 @@ class DrawBot:
 
     def terminate(self):
         """Smart collapse of all threads and comms"""
-
         print('TERMINATING')
         self.digibot.go_position_end()
-        self.running = False
         self.digibot.close()
+        self.running = False
 
     def rnd(self, power_of_command: int) -> int:
         """Returns a randomly generated + or - integer,
@@ -256,7 +255,7 @@ class DrawBot:
                                               randrange(-5, 5))
                                              )
                     self.digibot.squiggle(squiggle_list)
-                    logging.info('3 < Emission < 8: small squiggle')
+                    logging.info('3 < Emission < 7: small squiggle')
 
                 # take a breath
                 sleep(0.4 / self.global_speed)
