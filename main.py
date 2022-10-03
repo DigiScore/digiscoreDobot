@@ -5,6 +5,7 @@ import pyaudio
 import numpy as np
 import logging
 from serial.tools import list_ports
+import sys
 
 from digibot import Digibot
 from nebula.nebula import Nebula
@@ -95,6 +96,7 @@ class DrawBot:
 
             # put normalised amplitude into Nebula's dictionary for use
             self.nebula.user_input(normalised_peak)
+        logging.info('quitting listener thread')
 
     def terminate(self):
         """Smart collapse of all threads and comms"""
@@ -102,6 +104,7 @@ class DrawBot:
         self.digibot.go_position_end()
         self.digibot.close()
         self.running = False
+        # sys.exit()
 
     def rnd(self, power_of_command: int) -> int:
         """Returns a randomly generated + or - integer,
@@ -166,20 +169,22 @@ class DrawBot:
         print("Started dobot control thread")
 
         while self.running:
+            print('\n========    new cycle    ========')
             # check end of duration
             if time() > self.end_time:
                 self.terminate()
+                break
 
             # get current nebula emission value
             live_emission_data = self.nebula.user_live_emission_data()
 
             # if the value has changed then ...
             if live_emission_data != self.old_value:
-                logging.info(f"MAIN: emission value = {live_emission_data}")
                 self.old_value = live_emission_data
 
                 # multiply by 10 for local logic (power value)
                 incoming_command = int(live_emission_data * 10) + 1
+                logging.info(f"MAIN: emission value = {live_emission_data} == {incoming_command}")
 
                 # 1. clear the alarms
                 self.digibot.clear_alarms()
@@ -264,7 +269,9 @@ class DrawBot:
             else:
                 sleep(0.4 / self.global_speed)
 
+        logging.info('quitting dobot director thread')
+
 
 if __name__ == "__main__":
-    DrawBot(duration_of_piece=240, continuous_line=True, speed=2)
+    DrawBot(duration_of_piece=60, continuous_line=True, speed=5)
 

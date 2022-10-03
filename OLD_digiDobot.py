@@ -355,9 +355,9 @@ class Dobot:
     #     msg.params.extend(bytearray(struct.pack('f', r)))
     #     return self._send_command(msg)
 
-    # def _follow_path(self, path):
-    #     for point in path:
-    #         queue_index = self.move_to(point[0], point[1], point[2], 50)
+    def _follow_path(self, path):
+        for point in path:
+            queue_index = self.move_to(point[0], point[1], point[2], 50)
 
     @staticmethod
     def _extract_cmd_index(response):
