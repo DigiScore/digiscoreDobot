@@ -169,7 +169,7 @@ class DrawBot:
         print("Started dobot control thread")
 
         while self.running:
-            print('\n========    new cycle    ========')
+            print('\n================')
             # check end of duration
             if time() > self.end_time:
                 self.terminate()
@@ -273,5 +273,5 @@ class DrawBot:
 
 
 if __name__ == "__main__":
-    DrawBot(duration_of_piece=60, continuous_line=True, speed=5)
+    DrawBot(duration_of_piece=180, continuous_line=True, speed=3)
 
