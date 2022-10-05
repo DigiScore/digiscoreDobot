@@ -24,7 +24,8 @@ class DrawBot:
     """
     def __init__(self, duration_of_piece: int = 120,
                  continuous_line: bool = True,
-                 speed: int = 1):
+                 speed: int = 1,
+                 staves: int = 1):
 
         # config logging for all modules
         logging.basicConfig(level=logging.INFO)
@@ -36,7 +37,7 @@ class DrawBot:
         port = available_ports[-1].device
 
         self.digibot = Digibot(port=port, verbose=False)
-        self.digibot.draw_stave()
+        self.digibot.draw_stave(staves=staves)
         self.digibot.go_position_ready()
 
         # reset speed
@@ -73,6 +74,8 @@ class DrawBot:
         listener_thread.start()
         dobot_thread.start()
 
+        # sys.exit()
+
     def director(self):
         """Loop thread that listens to live sound and analyses amplitude.
         Normalises then stores this into the nebula dataclass for shared use."""
@@ -101,10 +104,9 @@ class DrawBot:
     def terminate(self):
         """Smart collapse of all threads and comms"""
         print('TERMINATING')
-        self.digibot.go_position_end()
+        self.digibot.home()
         self.digibot.close()
         self.running = False
-        # sys.exit()
 
     def rnd(self, power_of_command: int) -> int:
         """Returns a randomly generated + or - integer,
@@ -160,7 +162,7 @@ class DrawBot:
         # check x-axis is in range
         if x <= 200 or x >= 300:
             x = 250
-        self.digibot.move_to(x, newy + self.rnd(10), 0, r, True)
+        self.digibot.jump_to(x + self.rnd(10), newy + self.rnd(10), 0, r, True)
 
     def dobot_control(self):
         """Loop thread that controls the robot arm
@@ -206,7 +208,9 @@ class DrawBot:
                 (x, y, z, r, j1, j2, j3, j4) = self.digibot.pose()
                 logging.debug(f'Current position: x:{x} y:{y} z:{z} j1:{j1} j2:{j2} j3:{j3} j4:{j4}')
 
-                # low power response from AI Factory
+                #
+                # LOW power response from AI Factory
+                #
                 if incoming_command < 3:
 
                     # does this or that
@@ -221,7 +225,9 @@ class DrawBot:
                         self.digibot.squiggle([squiggle_list])
                         logging.info('Emission < 3: squiggle')
 
-                # high power response from AI Factory
+                #
+                # HIGH power response from AI Factory
+                #
                 elif incoming_command >= 7:
                     randchoice = randrange(3)
                     logging.debug(f'randchoice == {randchoice}')
@@ -257,7 +263,9 @@ class DrawBot:
                                          True)
                         logging.info('Emission >=7: draw arc/ circle')
 
-
+                #
+                # MID power response
+                #
                 else:
                     # small squiggles
                     squiggle_list = []
@@ -280,5 +288,5 @@ class DrawBot:
 
 
 if __name__ == "__main__":
-    DrawBot(duration_of_piece=180, continuous_line=True, speed=3)
+    DrawBot(duration_of_piece=180, continuous_line=True, speed=3, staves=1)
 

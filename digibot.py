@@ -2,10 +2,8 @@ import sys
 import os
 import math
 import struct
-from random import randrange, random, getrandbits
 from time import time, sleep
 from serial.tools import list_ports
-from time import time
 from pydobot import Dobot
 from pydobot.enums import PTPMode
 from pydobot.message import Message
@@ -14,7 +12,8 @@ from pydobot.enums.CommunicationProtocolIDs import CommunicationProtocolIDs
 
 
 class Digibot(Dobot):
-    """Controls movement and shapes drawn by Dobot"""
+    """Controls movement and shapes drawn by Dobot.
+    Inherets all the functions of Pydobot, and chances a few"""
 
     def __init__(self, port, verbose: bool = False):
         super().__init__(port, verbose)
@@ -33,19 +32,31 @@ class Digibot(Dobot):
     def draw_stave(self, staves: int = 1):
         """Draws a  line across the middle of an A3 paper, symbolising a stave.
         Has optional function to draw multiple staves.
+        Starts at right hand edge centre, and moves directly left.
         Args:
             staves: number of lines to draw. Default = 1"""
-        stave_start_pos = (250, 175, 0, 0)
-        stave_end_pos = (250, -175, 0, 0)
+
+        stave_gap = 2
+        x = 250 - ((staves * stave_gap) / 2)
+        y_start = 175
+        y_end = -175
+        z = 0
+        r = 0
 
         # goto start position for line draw, without pen
-        x1, y1, z1, r1 = stave_start_pos[:4]
-        x2, y2, z2, r2 = stave_end_pos[:4]
-        self.move_to(x1, y1, z1, r1)
+        self.move_to(x, y_start, z, r)
+        input('insert pen, then press enter')
 
         # draw a line/ stave
-        input('insert pen, then press enter')
-        self.move_to(x2, y2, z2, r2)
+        for stave in range(staves - 1):
+            print(f'drawing stave {stave + 1} out of {staves}')
+            self.move_to(x, y_end, z, r)
+
+            if staves > 1:
+                # reset to RH and draw the rest
+                x += stave_gap
+                self.jump_to(x, y_start, z, r)
+                self.move_to(x, y_end, z, r)
 
     def squiggle(self, arc_list: list):
         """accepts a list of tuples that define a sequence of
@@ -63,6 +74,9 @@ class Digibot(Dobot):
             sleep(0.2)
 
     def arc(self, x, y, z, r, cir_x, cir_y, cir_z, cir_r, wait=False):
+        """Draws an arc defined by a) circumference of arc (x, y, z, r),
+        with b) a finishing coordinates (cirx, ciry, cirz, cirr.
+        """
         msg = Message()
         msg.id = 101
         msg.ctrl = 0x03
@@ -84,35 +98,44 @@ class Digibot(Dobot):
     # todo - doc strings
     # todo - continuous trajectory - test circle
     def go_position_ready(self):
+        """moves directly to pre-defined position 'Ready Position'"""
         x, y, z, r = self.ready_position[:4]
         self.move_to(x, y, z, r, wait=True)
 
     def go_position_end(self):
+        """moves directly to pre-defined position 'end position'"""
         x, y, z, r = self.end_position[:4]
         self.move_to(x, y, z, r, wait=True)
 
     def jump_to(self, x, y, z, r, wait=True):
+        """Lifts pen up, and moves directly to defined coordinates (x, y, z, r)"""
         self._set_ptp_cmd(x, y, z, r, mode=PTPMode.JUMP_XYZ, wait=wait)
 
     def move_to_relative(self, x, y, z, r, wait=True):
+        """moves to new position defined in relatives coordinates to current position.
+        Delta/ relative movement is x, y, z, r from current position"""
         self._set_ptp_cmd(x, y, z, r, mode=PTPMode.MOVJ_XYZ_INC, wait=wait)
 
     def joint_move_to(self, j1, j2, j3, j4, wait=True):
+        """moves specific joints direct to new angles."""
         self.joint_move_to(j1, j2, j3, j4, wait)
 
     def home(self):
+        """Go directly to the home position 0, 0, 0, 0"""
         msg = Message()
         msg.id = CommunicationProtocolIDs.SET_HOME_CMD
         msg.ctrl = ControlValues.THREE
         return self._send_command(msg, wait=True)
 
     def clear_alarms(self) -> None:
+        """clear the alarms log and LED"""
         msg = Message()
-        msg.id = 20
+        msg.id = 20 # this should be 21, but that doesnt work!!
         msg.ctrl = 0x01
         self._send_command(msg)  # empty response
 
     def dot(self):
+        """draws a small dot at current position"""
         self.circle(0.1)
 
     def circle(self, size: float = 5):
