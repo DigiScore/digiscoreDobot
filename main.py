@@ -40,7 +40,7 @@ class DrawBot:
         self.digibot.go_position_ready()
 
         # reset speed
-        self.digibot.speed(velocity=100, acceleration=100)
+        # self.digibot.speed(velocity=100, acceleration=100)
         self.global_speed = speed
         self.dobot_commands_queue = []
 
@@ -112,7 +112,7 @@ class DrawBot:
         pos = 1
         if getrandbits(1):
             pos = -1
-        result = (randrange(1, 5) + power_of_command) * pos
+        result = (randrange(1, 5) + randrange(power_of_command)) * pos
         logging.debug(f'Rnd result = {result}')
         return result
 
@@ -169,10 +169,11 @@ class DrawBot:
         print("Started dobot control thread")
 
         while self.running:
-            print('\n================')
+            print('================')
             # check end of duration
             if time() > self.end_time:
                 self.terminate()
+                self.running = False
                 break
 
             # get current nebula emission value
@@ -192,9 +193,15 @@ class DrawBot:
                 # 2. move Y
                 self.move_y()
 
-                # 3. get speed based on power of incoming value
-                self.digibot.speed(velocity=(incoming_command * 10) * self.global_speed,
-                                   acceleration=(incoming_command * 10) * self.global_speed)
+                # 3. get speed based on power of incoming value * global speed setting * 2
+                if getrandbits(1):
+                    self.digibot.speed(velocity=((incoming_command * 10) * self.global_speed) * 2,
+                                       acceleration=((incoming_command * 10) * self.global_speed) * 2
+                                       )
+                else:
+                    self.digibot.speed(velocity=randrange(30, 200),
+                                       acceleration=randrange(30, 200)
+                                       )
 
                 (x, y, z, r, j1, j2, j3, j4) = self.digibot.pose()
                 logging.debug(f'Current position: x:{x} y:{y} z:{z} j1:{j1} j2:{j2} j3:{j3} j4:{j4}')

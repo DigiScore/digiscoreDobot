@@ -81,6 +81,8 @@ class Digibot(Dobot):
     #     for point in path:
     #         queue_index = self.move_to(point[0], point[1], point[2], 50)
 
+    # todo - doc strings
+    # todo - continuous trajectory - test circle
     def go_position_ready(self):
         x, y, z, r = self.ready_position[:4]
         self.move_to(x, y, z, r, wait=True)
