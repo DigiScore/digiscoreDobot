@@ -280,13 +280,13 @@ class DrawBot:
                 # take a breath
                 sleep(0.4 / self.global_speed)
 
-            # wait a bit
+            # wait a bit until the new emission is different from current
             else:
-                sleep(0.4 / self.global_speed)
+                sleep(0.4)
 
         logging.info('quitting dobot director thread')
 
 
 if __name__ == "__main__":
-    DrawBot(duration_of_piece=180, continuous_line=True, speed=3, staves=1)
+    DrawBot(duration_of_piece=180, continuous_line=True, speed=3, staves=5)
 
