@@ -63,6 +63,7 @@ class Nebula:
         # Build the AI factory and pass it the data dict
         self.AI_factory = AIFactory(self.datadict, speed)
 
+        # todo - this should be controlled by main
         # Start affect listener
         self.affect = Affect(self.datadict, speed)
 

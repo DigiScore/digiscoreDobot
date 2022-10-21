@@ -48,6 +48,7 @@ class Affect:
         # little val for emission control avoiding repeated vals (see below)
         self.old_val = 0
 
+    # todo - this should control movement direct
     def listener(self):
         """Listens to the realtime incoming signal that is stored in the dataclass ("user_input")
         and calculates an affectual response based on general boundaries:
