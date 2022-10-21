@@ -47,16 +47,19 @@ class Digibot(Dobot):
         self.move_to(x, y_start, z, r)
         input('insert pen, then press enter')
 
-        # draw a line/ stave
-        for stave in range(staves - 1):
-            print(f'drawing stave {stave + 1} out of {staves}')
-            self.move_to(x, y_end, z, r)
-
-            if staves > 1:
-                # reset to RH and draw the rest
-                x += stave_gap
-                self.jump_to(x, y_start, z, r)
+        if staves >= 1:
+            # draw a line/ stave
+            for stave in range(staves - 1):
+                print(f'drawing stave {stave + 1} out of {staves}')
                 self.move_to(x, y_end, z, r)
+
+                if staves > 1:
+                    # reset to RH and draw the rest
+                    x += stave_gap
+                    self.jump_to(x, y_start, z, r)
+                    self.move_to(x, y_end, z, r)
+        else:
+            self.jump_to(x, y_end, z, r)
 
     def squiggle(self, arc_list: list):
         """accepts a list of tuples that define a sequence of

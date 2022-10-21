@@ -288,5 +288,5 @@ class DrawBot:
 
 
 if __name__ == "__main__":
-    DrawBot(duration_of_piece=180, continuous_line=True, speed=3, staves=5)
+    DrawBot(duration_of_piece=80, continuous_line=True, speed=3, staves=0)
 
