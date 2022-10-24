@@ -21,6 +21,7 @@ class Affect:
     percept, and duration of such listening."""
 
     def __init__(self,
+                 dobot_commands_queue,
                  datadict: NebulaDataClass,
                  speed: int = 1
                  ):
@@ -42,14 +43,14 @@ class Affect:
         self.datadict = datadict
 
         # Emission list is the highest level comms back to client
-        # self.emission_list = []
+        self.dobot_commands_queue = dobot_commands_queue
         self.live_emission_data = 1
 
         # little val for emission control avoiding repeated vals (see below)
         self.old_val = 0
 
     # todo - this should control movement direct
-    def listener(self):
+    def thought_train(self):
         """Listens to the realtime incoming signal that is stored in the dataclass ("user_input")
         and calculates an affectual response based on general boundaries:
             HIGH - if input stream is LOUD (0.8+) then emit, smash a random fill and break out to Daddy cycle...
@@ -104,15 +105,15 @@ class Affect:
 
                     # make the master output the current value of the affect stream
                     # 1. go get the current value from dict
-                    affect_listen = getattr(self.datadict, self.rnd_stream)
-                    logging.debug(f'Affect stream current input value from {self.rnd_stream} == {affect_listen}')
+                    thought_train = getattr(self.datadict, self.rnd_stream)
+                    logging.debug(f'Affect stream current input value from {self.rnd_stream} == {thought_train}')
 
                     # 2. send to Master Output
-                    setattr(self.datadict, 'master_output', affect_listen)
-                    logging.debug(f'\t\t ==============  master move output = {affect_listen}')
+                    setattr(self.datadict, 'master_output', thought_train)
+                    logging.debug(f'\t\t ==============  master move output = {thought_train}')
 
                     # 3. emit to the client at various points in the affect cycle
-                    self.emitter(affect_listen)
+                    self.emitter(thought_train)
 
                     ###############################################
                     #
@@ -137,7 +138,11 @@ class Affect:
                         # B - jumps out of this loop into daddy
                         self.interrupt_bang = False
 
-                        # C break out of this loop, and next (cos of flag)
+                        # C - interrupt Queue
+                        self.dobot_commands_queue.get()
+                        self.dobot_commands_queue.put(peak * 10)
+
+                        # D- break out of this loop, and next (cos of flag)
                         break
 
                     # MEDIUM
@@ -165,13 +170,14 @@ class Affect:
             # and wait for a cycle
             sleep(rhythm_rate)
 
-    def emitter(self, incoming_affect_listen):
-        if incoming_affect_listen != self.old_val:
+    def emitter(self, thought_train):
+        if thought_train != self.old_val:
             # self.emission_list.append(incoming_affect_listen)
-            self.live_emission_data = incoming_affect_listen
-            # if self.affect_logging:
+            # self.live_emission_data = incoming_affect_listen
+            self.dobot_commands_queue.put(thought_train)
+
             logging.debug(f'AFFECT:                                EMITTING value {self.live_emission_data}')
-        self.old_val = incoming_affect_listen
+        self.old_val = thought_train
 
     def random_dict_fill(self):
         """Fills the working dataclass with random values. Generally called when

@@ -47,7 +47,7 @@ class Nebula:
     Args:
         speed: general tempo/ feel of Nebula's response (0.5 ~ moderate fast, 1 ~ moderato; 2 ~ presto)"""
     # todo = speed
-    def __init__(self, speed=1):
+    def __init__(self, dobot_commands_queue, speed=1):
         print('building engine server')
 
         # Set global vars
@@ -65,7 +65,7 @@ class Nebula:
 
         # todo - this should be controlled by main
         # Start affect listener
-        self.affect = Affect(self.datadict, speed)
+        self.affect = Affect(dobot_commands_queue, self.datadict, speed)
 
 
     def director(self):
@@ -74,7 +74,7 @@ class Nebula:
         print('Starting the Nebula Director')
         # declares all threads
         t1 = Thread(target=self.AI_factory.make_data)
-        t2 = Thread(target=self.affect.listener)
+        t2 = Thread(target=self.affect.thought_train)
 
         # assigns them a daemon
         t1.daemon = True

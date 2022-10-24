@@ -9,6 +9,7 @@ import sys
 
 from digibot import Digibot
 from nebula.nebula import Nebula
+from queue import Queue
 
 class DrawBot:
     """
@@ -43,10 +44,10 @@ class DrawBot:
         # reset speed
         # self.digibot.speed(velocity=100, acceleration=100)
         self.global_speed = speed
-        self.dobot_commands_queue = []
+        self.dobot_commands_queue = Queue(maxsize=1)
 
         # start Nebula AI Factory
-        self.nebula = Nebula(speed=speed)
+        self.nebula = Nebula(self.dobot_commands_queue, speed=speed)
         self.nebula.director()
 
         # set up mic listening funcs
@@ -172,118 +173,120 @@ class DrawBot:
         print("Started dobot control thread")
 
         while self.running:
-            print('================')
-            # check end of duration
-            if time() > self.end_time:
-                self.terminate()
-                self.running = False
-                break
+            while not self.dobot_commands_queue.empty():
+                print('================')
+                # check end of duration
+                if time() > self.end_time:
+                    self.terminate()
+                    self.running = False
+                    break
 
-            # get current nebula emission value
-            live_emission_data = self.nebula.user_live_emission_data()
+                # get current nebula emission value
+                # live_emission_data = self.nebula.user_live_emission_data()
+                live_emission_data = self.dobot_commands_queue.get()
 
-            # if the value has changed then ...
-            if live_emission_data != self.old_value:
-                self.old_value = live_emission_data
+                # if the value has changed then ...
+                if live_emission_data != self.old_value:
+                    self.old_value = live_emission_data
 
-                # multiply by 10 for local logic (power value)
-                incoming_command = int(live_emission_data * 10) + 1
-                logging.info(f"MAIN: emission value = {live_emission_data} == {incoming_command}")
+                    # multiply by 10 for local logic (power value)
+                    incoming_command = int(live_emission_data * 10) + 1
+                    logging.info(f"MAIN: emission value = {live_emission_data} == {incoming_command}")
 
-                # 1. clear the alarms
-                self.digibot.clear_alarms()
+                    # 1. clear the alarms
+                    self.digibot.clear_alarms()
 
-                # 2. move Y
-                self.move_y()
+                    # 2. move Y
+                    self.move_y()
 
-                # 3. get speed based on power of incoming value * global speed setting * 2
-                if getrandbits(1):
-                    self.digibot.speed(velocity=((incoming_command * 10) * self.global_speed) * 2,
-                                       acceleration=((incoming_command * 10) * self.global_speed) * 2
-                                       )
-                else:
-                    self.digibot.speed(velocity=randrange(30, 200),
-                                       acceleration=randrange(30, 200)
-                                       )
-
-                (x, y, z, r, j1, j2, j3, j4) = self.digibot.pose()
-                logging.debug(f'Current position: x:{x} y:{y} z:{z} j1:{j1} j2:{j2} j3:{j3} j4:{j4}')
-
-                #
-                # LOW power response from AI Factory
-                #
-                if incoming_command < 3:
-
-                    # does this or that
+                    # 3. get speed based on power of incoming value * global speed setting * 2
                     if getrandbits(1):
-                        self.move_y_random()
-                        logging.info('Emission < 3: move Y random')
+                        self.digibot.speed(velocity=((incoming_command * 10) * self.global_speed) * 2,
+                                           acceleration=((incoming_command * 10) * self.global_speed) * 2
+                                           )
                     else:
-                        squiggle_list = (self.rnd(incoming_command),
-                                         self.rnd(incoming_command),
-                                         self.rnd(incoming_command)
-                                         )
-                        self.digibot.squiggle([squiggle_list])
-                        logging.info('Emission < 3: squiggle')
+                        self.digibot.speed(velocity=randrange(30, 200),
+                                           acceleration=randrange(30, 200)
+                                           )
 
-                #
-                # HIGH power response from AI Factory
-                #
-                elif incoming_command >= 7:
-                    randchoice = randrange(3)
-                    logging.debug(f'randchoice == {randchoice}')
+                    (x, y, z, r, j1, j2, j3, j4) = self.digibot.pose()
+                    logging.debug(f'Current position: x:{x} y:{y} z:{z} j1:{j1} j2:{j2} j3:{j3} j4:{j4}')
 
-                    # line to somewhere
-                    if randchoice == 0:
-                        self.digibot.move_to(x + self.rnd(incoming_command),
+                    #
+                    # LOW power response from AI Factory
+                    #
+                    if incoming_command < 3:
+
+                        # does this or that
+                        if getrandbits(1):
+                            self.move_y_random()
+                            logging.info('Emission < 3: move Y random')
+                        else:
+                            squiggle_list = (self.rnd(incoming_command),
+                                             self.rnd(incoming_command),
+                                             self.rnd(incoming_command)
+                                             )
+                            self.digibot.squiggle([squiggle_list])
+                            logging.info('Emission < 3: squiggle')
+
+                    #
+                    # HIGH power response from AI Factory
+                    #
+                    elif incoming_command >= 7:
+                        randchoice = randrange(3)
+                        logging.debug(f'randchoice == {randchoice}')
+
+                        # line to somewhere
+                        if randchoice == 0:
+                            self.digibot.move_to(x + self.rnd(incoming_command),
+                                                 y + self.rnd(incoming_command),
+                                                 z, 0,
+                                                 True)
+                            logging.info('Emission >=7: draw line')
+
+                        # big messy squiggles
+                        if randchoice == 1:
+                            squiggle_list = []
+                            for n in range(randrange(2, 4)):
+                                squiggle_list.append((randrange(-10, 10),
+                                                      randrange(-10, 10),
+                                                      randrange(-10, 10))
+                                                     )
+                            self.digibot.squiggle(squiggle_list)
+                            logging.info('Emission >=7: messy squiggle')
+
+
+                        # arc/ circle
+                        elif randchoice == 2:
+                            self.digibot.arc(x + self.rnd(incoming_command),
+                                             y + self.rnd(incoming_command),
+                                             z, 0,
+                                             x + self.rnd(incoming_command),
                                              y + self.rnd(incoming_command),
                                              z, 0,
                                              True)
-                        logging.info('Emission >=7: draw line')
+                            logging.info('Emission >=7: draw arc/ circle')
 
-                    # big messy squiggles
-                    if randchoice == 1:
+                    #
+                    # MID power response
+                    #
+                    else:
+                        # small squiggles
                         squiggle_list = []
                         for n in range(randrange(2, 4)):
-                            squiggle_list.append((randrange(-10, 10),
-                                                  randrange(-10, 10),
-                                                  randrange(-10, 10))
+                            squiggle_list.append((randrange(-5, 5),
+                                                  randrange(-5, 5),
+                                                  randrange(-5, 5))
                                                  )
                         self.digibot.squiggle(squiggle_list)
-                        logging.info('Emission >=7: messy squiggle')
+                        logging.info('3 < Emission < 7: small squiggle')
 
-
-                    # arc/ circle
-                    elif randchoice == 2:
-                        self.digibot.arc(x + self.rnd(incoming_command),
-                                         y + self.rnd(incoming_command),
-                                         z, 0,
-                                         x + self.rnd(incoming_command),
-                                         y + self.rnd(incoming_command),
-                                         z, 0,
-                                         True)
-                        logging.info('Emission >=7: draw arc/ circle')
-
-                #
-                # MID power response
-                #
-                else:
-                    # small squiggles
-                    squiggle_list = []
-                    for n in range(randrange(2, 4)):
-                        squiggle_list.append((randrange(-5, 5),
-                                              randrange(-5, 5),
-                                              randrange(-5, 5))
-                                             )
-                    self.digibot.squiggle(squiggle_list)
-                    logging.info('3 < Emission < 7: small squiggle')
-
-                # take a breath
-                sleep(0.4 / self.global_speed)
+                    # take a breath
+                    sleep(0.4 / self.global_speed)
 
             # wait a bit until the new emission is different from current
-            else:
-                sleep(0.4)
+            # else:
+            sleep(0.1)
 
         logging.info('quitting dobot director thread')
 
