@@ -197,7 +197,7 @@ class DrawBot:
                     self.digibot.clear_alarms()
 
                     # 2. move Y
-                    self.move_y()
+                    # self.move_y()
 
                     # 3. get speed based on power of incoming value * global speed setting * 2
                     if getrandbits(1):
@@ -216,23 +216,30 @@ class DrawBot:
                     # LOW power response from AI Factory
                     #
                     if incoming_command < 3:
+                        # self.move_y()
+                        # self.digibot.dot()
 
-                        # does this or that
-                        if getrandbits(1):
-                            self.move_y_random()
-                            logging.info('Emission < 3: move Y random')
-                        else:
-                            squiggle_list = (self.rnd(incoming_command),
-                                             self.rnd(incoming_command),
-                                             self.rnd(incoming_command)
-                                             )
-                            self.digibot.squiggle([squiggle_list])
-                            logging.info('Emission < 3: squiggle')
+                        logging.info('Emission < 3: PASS')
+
+                        #
+                        # # does this or that
+                        # if getrandbits(1):
+                        #     self.move_y_random()
+                        #     logging.info('Emission < 3: move Y random')
+                        # else:
+                        #     squiggle_list = (self.rnd(incoming_command),
+                        #                      self.rnd(incoming_command),
+                        #                      self.rnd(incoming_command)
+                        #                      )
+                        #     self.digibot.squiggle([squiggle_list])
+                        #     logging.info('Emission < 3: squiggle')
 
                     #
                     # HIGH power response from AI Factory
                     #
                     elif incoming_command >= 7:
+                        self.move_y()
+
                         randchoice = randrange(3)
                         logging.debug(f'randchoice == {randchoice}')
 
@@ -241,7 +248,7 @@ class DrawBot:
                             self.digibot.move_to(x + self.rnd(incoming_command),
                                                  y + self.rnd(incoming_command),
                                                  z, 0,
-                                                 True)
+                                                 False)
                             logging.info('Emission >=7: draw line')
 
                         # big messy squiggles
@@ -264,7 +271,7 @@ class DrawBot:
                                              x + self.rnd(incoming_command),
                                              y + self.rnd(incoming_command),
                                              z, 0,
-                                             True)
+                                             False)
                             logging.info('Emission >=7: draw arc/ circle')
 
                     #
@@ -274,9 +281,9 @@ class DrawBot:
                         # small squiggles
                         squiggle_list = []
                         for n in range(randrange(2, 4)):
-                            squiggle_list.append((randrange(-5, 5),
-                                                  randrange(-5, 5),
-                                                  randrange(-5, 5))
+                            squiggle_list.append((randrange(-5, 5) / 10,
+                                                  randrange(-5, 5) / 10,
+                                                  randrange(-5, 5) / 10)
                                                  )
                         self.digibot.squiggle(squiggle_list)
                         logging.info('3 < Emission < 7: small squiggle')
@@ -284,9 +291,10 @@ class DrawBot:
                     # take a breath
                     sleep(0.4 / self.global_speed)
 
-            # wait a bit until the new emission is different from current
-            # else:
-            sleep(0.1)
+                # wait a bit until the new emission is different from current
+                # else:
+                # print("!!!!!")
+                sleep(0.1)
 
         logging.info('quitting dobot director thread')
 

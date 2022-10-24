@@ -140,7 +140,7 @@ class Affect:
 
                         # C - interrupt Queue
                         self.dobot_commands_queue.get()
-                        self.dobot_commands_queue.put(peak * 10)
+                        self.dobot_commands_queue.put(peak)
 
                         # D- break out of this loop, and next (cos of flag)
                         break

@@ -94,9 +94,21 @@ class Digibot(Dobot):
         msg.params.extend(bytearray(struct.pack('f', cir_r)))
         return self._send_command(msg, wait)
 
-    # def follow_path(self, path):
-    #     for point in path:
-    #         queue_index = self.move_to(point[0], point[1], point[2], 50)
+    def follow_path(self, path):
+        for point in path:
+            queue_index = self.move_to(point[0], point[1], point[2], 0)
+
+    def continuous_trajectory(self, x, y, z, velocity = 50, wait = True):
+        msg = Message()
+        msg.id = 91
+        msg.ctrl = 0x03
+        msg.params = bytearray([])
+        msg.params.extend(bytearray(struct.pack('f', x)))
+        msg.params.extend(bytearray(struct.pack('f', y)))
+        msg.params.extend(bytearray(struct.pack('f', z)))
+        msg.params.extend(bytearray(struct.pack('f', velocity)))
+
+        return self._send_command(msg, wait)
 
     # todo - continuous trajectory - test circle
     def go_position_ready(self):
@@ -138,9 +150,9 @@ class Digibot(Dobot):
 
     def dot(self):
         """draws a small dot at current position"""
-        self.circle(0.1)
+        self.note_head(0.1)
 
-    def circle(self, size: float = 5):
+    def note_head(self, size: float = 5, steps: int = 4):
         """draws a circle at the current position.
         Default is 5 pixels diameter.
         Args:
@@ -153,13 +165,14 @@ class Digibot(Dobot):
 
         # Draw circle
         path = []
-        steps = 24
+        steps = steps
         scale = size
-        for i in range(steps + 2):
+        for i in range(steps + 1):
             x = math.cos(((math.pi * 2) / steps) * i)
             y = math.sin(((math.pi * 2) / steps) * i)
-            path.append([center[0] + x * scale, center[1] + y * scale, center[2], center[3]])
+            path.append([center[0] + x * scale, center[1] + y * scale, center[2]])
         self.follow_path(path)
+        self.move_to(center[0], center[1], center[2], center[3])
 
 
 if __name__ == "__main__":
@@ -167,7 +180,7 @@ if __name__ == "__main__":
     available_ports = list_ports.comports()
     print(f'available ports: {[x.device for x in available_ports]}')
     port = available_ports[-1].device
-    digibot = Digibot(port=port, verbose=True)
+    digibot = Digibot(port=port, verbose=False)
 
     # print('drawing stave')
     # digibot.draw_stave()
@@ -175,8 +188,11 @@ if __name__ == "__main__":
     (x, y, z, r, j1, j2, j3, j4) = digibot.pose()
     print(f'x:{x} y:{y} z:{z} j1:{j1} j2:{j2} j3:{j3} j4:{j4}')
 
-    digibot.squiggle([(5, 5, 5)])
 
-    digibot.circle(20)
+    # digibot.arc(x + 50, y, z, r, x + 50, y + 50, z, r)
 
-    digibot.close()
+    # digibot.squiggle([(5, 5, 5)])
+    #
+    digibot.dot()
+    #
+    # digibot.close()
