@@ -19,6 +19,7 @@ from random import random, randrange
 from threading import Thread
 import logging
 from time import sleep
+from queue import Queue
 
 # import Nebula modules
 from nebula.ai_factory import AIFactory
@@ -46,7 +47,7 @@ class Nebula:
 
     Args:
         speed: general tempo/ feel of Nebula's response (0.5 ~ moderate fast, 1 ~ moderato; 2 ~ presto)"""
-    # todo = speed
+
     def __init__(self, dobot_commands_queue, speed=1):
         print('building engine server')
 
@@ -63,10 +64,8 @@ class Nebula:
         # Build the AI factory and pass it the data dict
         self.AI_factory = AIFactory(self.datadict, speed)
 
-        # todo - this should be controlled by main
         # Start affect listener
         self.affect = Affect(dobot_commands_queue, self.datadict, speed)
-
 
     def director(self):
         """Starts the server/ AI threads
@@ -110,10 +109,11 @@ class Nebula:
         self.AI_factory.quit()
 
 if __name__ == '__main':
-    test = Nebula()
+    q = Queue()
+    test = Nebula(q)
     test.director()
-    if len(test.emission_list) > 0:
-        emission_val = test.emission_list.pop()
+    if not q.empty():
+        emission_val = q.get()
         print(emission_val)
     else:
         sleep(0.1)

@@ -216,31 +216,45 @@ class DrawBot:
                     # LOW power response from AI Factory
                     #
                     if incoming_command < 3:
-                        # self.move_y()
+                        self.move_y()
                         # self.digibot.dot()
 
                         logging.info('Emission < 3: PASS')
 
-                        #
-                        # # does this or that
-                        # if getrandbits(1):
-                        #     self.move_y_random()
-                        #     logging.info('Emission < 3: move Y random')
-                        # else:
-                        #     squiggle_list = (self.rnd(incoming_command),
-                        #                      self.rnd(incoming_command),
-                        #                      self.rnd(incoming_command)
-                        #                      )
-                        #     self.digibot.squiggle([squiggle_list])
-                        #     logging.info('Emission < 3: squiggle')
+
 
                     #
                     # HIGH power response from AI Factory
                     #
-                    elif incoming_command >= 7:
-                        self.move_y()
+                    elif incoming_command >= 8:
+                        # self.move_y_random()
 
-                        randchoice = randrange(3)
+                        # does this or that
+                        if getrandbits(1):
+                            self.move_y_random()
+                            logging.info('Emission >= 8: move Y random')
+                        else:
+                            self.move_y()
+                            self.digibot.arc(x + self.rnd(incoming_command),
+                                             y + self.rnd(incoming_command),
+                                             z, 0,
+                                             x + self.rnd(incoming_command),
+                                             y + self.rnd(incoming_command),
+                                             z, 0,
+                                             False)
+
+                            logging.info('Emission >= 8: arc')
+
+
+
+
+                    #
+                    # MID power response
+                    #
+                    else:
+
+
+                        randchoice = randrange(4)
                         logging.debug(f'randchoice == {randchoice}')
 
                         # line to somewhere
@@ -255,38 +269,41 @@ class DrawBot:
                         if randchoice == 1:
                             squiggle_list = []
                             for n in range(randrange(2, 4)):
-                                squiggle_list.append((randrange(-10, 10),
-                                                      randrange(-10, 10),
-                                                      randrange(-10, 10))
+                                squiggle_list.append((randrange(-5, 5) / 10,
+                                                      randrange(-5, 5) / 10,
+                                                      randrange(-5, 5) / 10)
                                                      )
                             self.digibot.squiggle(squiggle_list)
-                            logging.info('Emission >=7: messy squiggle')
+                            logging.info('Emission >=7: small squiggle')
 
 
                         # arc/ circle
                         elif randchoice == 2:
-                            self.digibot.arc(x + self.rnd(incoming_command),
-                                             y + self.rnd(incoming_command),
-                                             z, 0,
-                                             x + self.rnd(incoming_command),
-                                             y + self.rnd(incoming_command),
-                                             z, 0,
-                                             False)
+                            self.digibot.dot()
+
+                        elif randchoice == 3:
+                            note_size = self.rnd(5)
+                            self.digibot.note_head(note_size)
+
+                            # self.digibot.arc(x + self.rnd(incoming_command),
+                            #                  y + self.rnd(incoming_command),
+                            #                  z, 0,
+                            #                  x + self.rnd(incoming_command),
+                            #                  y + self.rnd(incoming_command),
+                            #                  z, 0,
+                            #                  False)
                             logging.info('Emission >=7: draw arc/ circle')
 
-                    #
-                    # MID power response
-                    #
-                    else:
-                        # small squiggles
-                        squiggle_list = []
-                        for n in range(randrange(2, 4)):
-                            squiggle_list.append((randrange(-5, 5) / 10,
-                                                  randrange(-5, 5) / 10,
-                                                  randrange(-5, 5) / 10)
-                                                 )
-                        self.digibot.squiggle(squiggle_list)
-                        logging.info('3 < Emission < 7: small squiggle')
+
+                        # # small squiggles
+                        # squiggle_list = []
+                        # for n in range(randrange(2, 4)):
+                        #     squiggle_list.append((randrange(-5, 5) / 10,
+                        #                           randrange(-5, 5) / 10,
+                        #                           randrange(-5, 5) / 10)
+                        #                          )
+                        # self.digibot.squiggle(squiggle_list)
+                        # logging.info('3 < Emission < 7: small squiggle')
 
                     # take a breath
                     sleep(0.4 / self.global_speed)
@@ -300,5 +317,5 @@ class DrawBot:
 
 
 if __name__ == "__main__":
-    DrawBot(duration_of_piece=80, continuous_line=True, speed=3, staves=0)
+    DrawBot(duration_of_piece=180, continuous_line=False, speed=3, staves=0)
 
