@@ -109,6 +109,7 @@ class Nebula:
         self.AI_factory.quit()
 
 if __name__ == '__main':
+    logging.basicConfig(level=logging.INFO)
     q = Queue()
     test = Nebula(q)
     test.director()

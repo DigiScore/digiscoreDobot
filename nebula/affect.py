@@ -49,7 +49,6 @@ class Affect:
         # little val for emission control avoiding repeated vals (see below)
         self.old_val = 0
 
-    # todo - this should control movement direct
     def thought_train(self):
         """Listens to the realtime incoming signal that is stored in the dataclass ("user_input")
         and calculates an affectual response based on general boundaries:
@@ -63,7 +62,7 @@ class Affect:
             self.interrupt_bang = True
 
             # Top level calc master cycle before a change
-            master_cycle = (randrange(600, 2600) / 100)  * self.global_speed
+            master_cycle = (randrange(600, 2600) / 100) * self.global_speed
             loop_end = time() + master_cycle
 
             logging.debug('\t\t\t\t\t\t\t\t=========AFFECT - Daddy cycle started ===========')
@@ -73,10 +72,10 @@ class Affect:
             while time() < loop_end:
                 # calc rhythmic intensity based on self-awareness factor & global speed
                 intensity = getattr(self.datadict, 'self_awareness')
-                # print('////////////////////////   intensity = ', intensity)
+                logging.debug(f'////////////////////////   intensity =  {intensity}')
 
-                rhythm_rate = (randrange(30,
-                                        100) / 100) / self.global_speed  # round(((rhythm_rate / intensity) * self.global_speed), 2) # / 10  # rhythm_rate * self.global_speed
+                rhythm_rate = (randrange(10,
+                                        80) / 100) # / self.global_speed  # round(((rhythm_rate / intensity) * self.global_speed), 2) # / 10  # rhythm_rate * self.global_speed
                 # self.datadict['rhythm_rate'] = rhythm_rate
                 setattr(self.datadict, 'rhythm_rate', rhythm_rate)
                 logging.debug(f'////////////////////////   rhythm rate = {rhythm_rate}')
@@ -96,7 +95,7 @@ class Affect:
 
                 # hold this stream for 1-4 secs, unless interrupt bang
                 end_time = time() + (randrange(1000, 4000) / 1000)
-                logging.debug('end time = ', end_time)
+                logging.debug(f'end time = {end_time}')
 
                 # 3. baby cycle - own time loops
                 while time() < end_time:
@@ -124,7 +123,7 @@ class Affect:
 
                     # 1. get current mic level
                     peak = getattr(self.datadict, "user_in")
-                    logging.debug('testing current mic level for affect = ', peak)
+                    logging.debug(f'testing current mic level for affect = {peak}')
 
                     # 2. calc affect on behaviour
                     # LOUD
@@ -140,7 +139,7 @@ class Affect:
 
                         # C - interrupt Queue
                         self.dobot_commands_queue.get()
-                        self.dobot_commands_queue.put(peak)
+                        # self.dobot_commands_queue.put(peak)
 
                         # D- break out of this loop, and next (cos of flag)
                         break

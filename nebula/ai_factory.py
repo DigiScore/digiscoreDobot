@@ -63,7 +63,13 @@ class AIFactory:
         while self.running:
             # get the first rhythm rate from the datadict
             rhythm_rate = getattr(self.datadict, 'rhythm_rate')
-            rhythm_rate /= self.global_speed
+            # rhythm_rate /= self.global_speed
+
+
+
+            # todo - check rhythm rate maths here!!!
+
+
 
             # PATCH BOARD - CROSS PLUGS NET OUTPUTS TO INPUTS
             # get input vars from dict (NB not always self)
