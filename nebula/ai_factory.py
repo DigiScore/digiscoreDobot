@@ -25,7 +25,7 @@ class AIFactory:
 
         self.net_logging = False
         self.datadict = datadict
-        # self.global_speed = speed
+        self.global_speed = speed
         self.running = True
 
         # instantiate nets as objects and make  models
@@ -62,7 +62,7 @@ class AIFactory:
         # now spin the plate and do its own ting
         while self.running:
             # get the first rhythm rate from the datadict
-            rhythm_rate = getattr(self.datadict, 'rhythm_rate') # * global speed?
+            rhythm_rate = getattr(self.datadict, 'rhythm_rate') + self.global_speed
 
             # PATCH BOARD - CROSS PLUGS NET OUTPUTS TO INPUTS
             # get input vars from dict (NB not always self)
