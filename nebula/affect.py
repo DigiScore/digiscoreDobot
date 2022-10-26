@@ -37,7 +37,7 @@ class Affect:
         # set running vars
         # self.affect_logging = False
         self.running = True
-        self.global_speed = speed
+        # self.global_speed = speed
 
         # own the dataclass
         self.datadict = datadict
@@ -62,7 +62,7 @@ class Affect:
             self.interrupt_bang = True
 
             # Top level calc master cycle before a change
-            master_cycle = (randrange(600, 2600) / 100) * self.global_speed
+            master_cycle = (randrange(600, 2600) / 100) # + self.global_speed
             loop_end = time() + master_cycle
 
             logging.debug('\t\t\t\t\t\t\t\t=========AFFECT - Daddy cycle started ===========')

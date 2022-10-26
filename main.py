@@ -21,29 +21,29 @@ class DrawBot:
     Args:
         duration_of_piece: the duration in seconds of the drawing
         continuous_line: Bool: True = will not jump between points
-        speed: int the dynamic tempo of the all processes. 1 = slow, 5 = fast
+        speed: int the dynamic tempo of the all processes. 1 = slow, 10 = fast
     """
     def __init__(self, duration_of_piece: int = 120,
                  continuous_line: bool = True,
-                 speed: int = 1,
+                 speed: int = 5,
                  staves: int = 1):
 
         # config logging for all modules
         logging.basicConfig(level=logging.INFO)
 
-        # start dobot communications
         # find available ports and locate Dobot (-1)
         available_ports = list_ports.comports()
         print(f'available ports: {[x.device for x in available_ports]}')
         port = available_ports[-1].device
 
+        # start dobot communications
         self.digibot = Digibot(port=port, verbose=False)
         self.digibot.draw_stave(staves=staves)
         self.digibot.go_position_ready()
 
-        # reset speed
-        # todo - sort out speed range
-        self.global_speed = speed
+        # find global speed 0.1 - 1 (reverse of speed)
+        # NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
+        self.global_speed = ((speed - 1) * (0.1 - 1) / (10 - 1)) + 1
         self.dobot_commands_queue = Queue(maxsize=1)
 
         # start Nebula AI Factory
@@ -74,7 +74,6 @@ class DrawBot:
 
         listener_thread.start()
         dobot_thread.start()
-
 
     def listener(self):
         """Loop thread that listens to live sound and analyses amplitude.
@@ -107,6 +106,11 @@ class DrawBot:
         self.digibot.home()
         self.digibot.close()
         self.running = False
+
+
+    ######################
+    # DRAWBOT CONTROLS
+    ######################
 
     def rnd(self, power_of_command: int) -> int:
         """Returns a randomly generated + or - integer,
@@ -304,11 +308,11 @@ class DrawBot:
                             logging.info('Emission 3-8: dot and line')
 
                     # take a breath
-                    # sleep(0.4 / self.global_speed)
-                    # self.move_y()
+                    sleep(self.global_speed)
 
                 # wait a bit until the new emission is different from current
                 self.move_y()
+                sleep(self.global_speed)
 
         logging.info('quitting dobot director thread')
 
