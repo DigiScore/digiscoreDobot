@@ -286,16 +286,16 @@ class Main:
                         elif randchoice == 3:
                             note_size = randrange(5)
                             note_shape = randrange(20)
-                            self.digibot.note_head(size=note_size,
-                                                   steps=note_shape)
+                            self.digibot.note_head(size=note_size + 1,
+                                                   steps=note_shape + 2)
                             logging.info('Emission 3-8: note head')
 
                         # 4 = note head and line
                         elif randchoice == 4:
                             note_size = randrange(5)
                             note_shape = randrange(20)
-                            self.digibot.note_head(size=note_size,
-                                                   steps=note_shape)
+                            self.digibot.note_head(size=note_size + 1,
+                                                   steps=note_shape + 2)
                             self.digibot.move_to(x + self.rnd(incoming_command),
                                                  y + self.rnd(incoming_command),
                                                  z, 0,
@@ -309,7 +309,7 @@ class Main:
                             logging.info('Emission 3-8: dot and line')
 
                     # take a breath
-                    sleep(self.global_speed)
+                    # sleep(self.global_speed)
 
                 # wait a bit until the new emission is different from current
                 self.move_y()
@@ -319,5 +319,5 @@ class Main:
 
 
 if __name__ == "__main__":
-    Main(duration_of_piece=180, continuous_line=False, speed=5, staves=2)
+    Main(duration_of_piece=380, continuous_line=True, speed=2, staves=1)
 
