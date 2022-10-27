@@ -97,7 +97,7 @@ class AIFactory:
             self.put_pred(3, pred4)
             self.put_pred(4, self_aware_pred)
 
-            sleep(rhythm_rate)
+            sleep(0.1) # rhythm rate
 
     # function to get input value for net prediction from dictionary
     def get_in_val(self, which_dict):

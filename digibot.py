@@ -159,27 +159,31 @@ class Digibot(Dobot):
         """draws a small dot at current position"""
         self.note_head(0.1)
 
-    def note_head(self, size: float = 5, steps: int = 4):
+    def note_head(self, size: float = 5):
         """draws a circle at the current position.
         Default is 5 pixels diameter.
         Args:
             size: radius in pixels
             drawing: True = pen on paper
             wait: True = wait till sequence finished"""
-        center = self.pose()
-        # print('Center:', center)
-        # self.bot.interface.set_continous_trajectory_params(200, 200, 200)
 
-        # Draw circle
-        path = []
-        steps = steps
-        scale = size
-        for i in range(steps + 1):
-            x = math.cos(((math.pi * 2) / steps) * i)
-            y = math.sin(((math.pi * 2) / steps) * i)
-            path.append([center[0] + x * scale, center[1] + y * scale, center[2]])
-        self.follow_path(path)
-        self.move_to(center[0], center[1], center[2], center[3])
+        (x, y, z, r, j1, j2, j3, j4) = self.pose()
+        self.arc(x + size, y, z, r, x + 0.01, y + 0.01, z, r)
+        #
+        # center = self.pose()
+        # # print('Center:', center)
+        # # self.bot.interface.set_continous_trajectory_params(200, 200, 200)
+        #
+        # # Draw circle
+        # path = []
+        # steps = steps
+        # scale = size
+        # for i in range(steps + 1):
+        #     x = math.cos(((math.pi * 2) / steps) * i)
+        #     y = math.sin(((math.pi * 2) / steps) * i)
+        #     path.append([center[0] + x * scale, center[1] + y * scale, center[2]])
+        # self.follow_path(path)
+        # self.move_to(center[0], center[1], center[2], center[3])
 
 
 if __name__ == "__main__":
@@ -196,10 +200,10 @@ if __name__ == "__main__":
     print(f'x:{x} y:{y} z:{z} j1:{j1} j2:{j2} j3:{j3} j4:{j4}')
 
 
-    # digibot.arc(x + 50, y, z, r, x + 50, y + 50, z, r)
+    digibot.arc(x + 5, y, z, r, x + 0, y + 0, z, r)
 
     # digibot.squiggle([(5, 5, 5)])
     #
-    digibot.dot()
+    # digibot.dot()
     #
     # digibot.close()

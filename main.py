@@ -37,8 +37,12 @@ class Main:
 
         # start dobot communications
         self.digibot = Digibot(port=port, verbose=False)
+        arm_speed = (((speed - 1) * (300 - 50)) / (10 - 1)) + 50
+        self.digibot.speed(velocity=arm_speed,
+                           acceleration=arm_speed)
         self.digibot.draw_stave(staves=staves)
         self.digibot.go_position_ready()
+
 
         # find global speed 0.1 - 1 (reverse of speed)
         # NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
@@ -208,14 +212,14 @@ class Main:
                     # self.move_y()
 
                     # 3. get speed based on power of incoming value * global speed setting * 2
-                    if getrandbits(1):
-                        self.digibot.speed(velocity=((incoming_command * 10) + (self.global_speed * 10)) * 2,
-                                           acceleration=((incoming_command * 10) + (self.global_speed * 10)) * 2
-                                           )
-                    else:
-                        self.digibot.speed(velocity=randrange(30, 200),
-                                           acceleration=randrange(30, 200)
-                                           )
+                    # if getrandbits(1):
+                    #     self.digibot.speed(velocity=((incoming_command * 10) + (self.global_speed * 10)) * 2,
+                    #                        acceleration=((incoming_command * 10) + (self.global_speed * 10)) * 2
+                    #                        )
+                    # else:
+                    #     self.digibot.speed(velocity=randrange(30, 200),
+                    #                        acceleration=randrange(30, 200)
+                    #                        )
 
                     (x, y, z, r, j1, j2, j3, j4) = self.digibot.pose()
                     logging.debug(f'Current position: x:{x} y:{y} z:{z} j1:{j1} j2:{j2} j3:{j3} j4:{j4}')
@@ -260,8 +264,8 @@ class Main:
 
                         # 0= line to somewhere
                         if randchoice == 0:
-                            self.digibot.move_to(x + self.rnd(incoming_command),
-                                                 y + self.rnd(incoming_command),
+                            self.digibot.move_to(x + self.rnd(incoming_command * 10),
+                                                 y + self.rnd(incoming_command * 10),
                                                  z, 0,
                                                  False)
                             logging.info('Emission 3-8: draw line')
@@ -286,18 +290,15 @@ class Main:
                         elif randchoice == 3:
                             note_size = randrange(5)
                             note_shape = randrange(20)
-                            self.digibot.note_head(size=note_size + 1,
-                                                   steps=note_shape + 2)
+                            self.digibot.note_head(size=note_size)
                             logging.info('Emission 3-8: note head')
 
                         # 4 = note head and line
                         elif randchoice == 4:
-                            note_size = randrange(5)
-                            note_shape = randrange(20)
-                            self.digibot.note_head(size=note_size + 1,
-                                                   steps=note_shape + 2)
-                            self.digibot.move_to(x + self.rnd(incoming_command),
-                                                 y + self.rnd(incoming_command),
+                            note_size = randrange(1, 10)
+                            self.digibot.note_head(size=note_size)
+                            self.digibot.move_to(x + self.rnd(incoming_command * 10),
+                                                 y + self.rnd(incoming_command * 10),
                                                  z, 0,
                                                  False)
                             logging.info('Emission 3-8: note head and line')
@@ -319,5 +320,5 @@ class Main:
 
 
 if __name__ == "__main__":
-    Main(duration_of_piece=380, continuous_line=True, speed=2, staves=1)
+    Main(duration_of_piece=380, continuous_line=True, speed=5, staves=1)
 
