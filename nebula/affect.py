@@ -105,11 +105,11 @@ class Affect:
                     # make the master output the current value of the affect stream
                     # 1. go get the current value from dict
                     thought_train = getattr(self.datadict, self.rnd_stream)
-                    logging.debug(f'Affect stream current input value from {self.rnd_stream} == {thought_train}')
+                    logging.info(f'Affect stream current input value from {self.rnd_stream} == {thought_train}')
 
                     # 2. send to Master Output
                     setattr(self.datadict, 'master_output', thought_train)
-                    logging.debug(f'\t\t ==============  master move output = {thought_train}')
+                    logging.info(f'\t\t ==============  thought_train output = {thought_train}')
 
                     # 3. emit to the client at various points in the affect cycle
                     self.emitter(thought_train)
@@ -170,12 +170,12 @@ class Affect:
             sleep(rhythm_rate)
 
     def emitter(self, thought_train):
-        if thought_train != self.old_val:
+        # if thought_train != self.old_val:
             # self.emission_list.append(incoming_affect_listen)
             # self.live_emission_data = incoming_affect_listen
-            self.dobot_commands_queue.put(thought_train)
+        self.dobot_commands_queue.put(thought_train)
 
-            logging.debug(f'AFFECT:                                EMITTING value {self.live_emission_data}')
+        logging.debug(f'AFFECT:                                EMITTING value {self.live_emission_data}')
         self.old_val = thought_train
 
     def random_dict_fill(self):

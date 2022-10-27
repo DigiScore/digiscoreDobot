@@ -21,11 +21,13 @@ class Main:
         duration_of_piece: the duration in seconds of the drawing
         continuous_line: Bool: True = will not jump between points
         speed: int the dynamic tempo of the all processes. 1 = slow, 10 = fast
+        pen: bool - True for pen, false for pencil
     """
     def __init__(self, duration_of_piece: int = 120,
                  continuous_line: bool = True,
                  speed: int = 5,
-                 staves: int = 1):
+                 staves: int = 1,
+                 pen: bool = True):
 
         # config logging for all modules
         logging.basicConfig(level=logging.INFO)
@@ -71,6 +73,7 @@ class Main:
         self.old_value = 0
         self.start_time = time()
         self.end_time = self.start_time + duration_of_piece
+        self.pen = pen
 
         # start the bot listening and drawing threads
         listener_thread = Thread(target=self.listener)
@@ -143,10 +146,11 @@ class Main:
             x = 250
 
         # move z (pen head) a little
-        if getrandbits(1):
-            z = 0
-        else:
-            z = randrange(-2, 2)
+        if self.pen:
+            if getrandbits(1):
+                z = 0
+            else:
+                z = randrange(-2, 2)
 
         # which mode
         if self.continuous_line:
@@ -164,18 +168,19 @@ class Main:
         # get current y-value
         (x, y, z, r, j1, j2, j3, j4) = self.digibot.pose()
         # NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
-        newy = (((elapsed - 0) * (175 - -175)) / (self.duration_of_piece - 0)) + -175
+        newy = ((((elapsed - 0) * (175 - -175)) / (self.duration_of_piece - 0)) + -175) + self.rnd(100)
         logging.debug(f'x:{x} y:{y} z:{z} j1:{j1} j2:{j2} j3:{j3} j4:{j4}')
 
         # check x-axis is in range
-        if x <= 200 or x >= 300:
-            x = 250
+        newx = x + self.rnd(100)
+        if newx <= 200 or newx >= 300:
+            newx = 250
 
         # which mode
         if self.continuous_line:
-            self.digibot.move_to(x + self.rnd(10), newy + self.rnd(10), 0, r, True)
+            self.digibot.move_to(newx, newy, 0, r, True)
         else:
-            self.digibot.jump_to(x + self.rnd(10), newy + self.rnd(10), 0, r, True)
+            self.digibot.jump_to(newx, newy, 0, r, True)
 
     def dobot_control(self):
         """Loop thread that controls the robot arm
@@ -228,46 +233,51 @@ class Main:
                     # LOW power response from AI Factory
                     #
                     if incoming_command < 2:
+                        """do nothing"""
                         # self.move_y()
                         # self.digibot.dot()
 
                         logging.info('Emission < 2: PASS')
+                        break
 
                     #
                     # HIGH power response from AI Factory
+                    # moves to a new random place
                     #
                     elif incoming_command >= 8:
-                        # self.move_y_random()
+                        """move to a random x, y position"""
+                        self.move_y_random()
 
                         # does this or that
-                        if getrandbits(1):
-                            self.move_y_random()
-                            logging.info('Emission >= 8: move Y random')
-                        else:
+                        # if getrandbits(1):
+                        #     self.move_y_random()
+                        #     logging.info('Emission >= 8: move Y random')
+                        # else:
                             # self.move_y()
-                            self.digibot.arc(x + self.rnd(incoming_command),
-                                             y + self.rnd(incoming_command),
-                                             z, 0,
-                                             x + self.rnd(incoming_command),
-                                             y + self.rnd(incoming_command),
-                                             z, 0,
-                                             False)
-                            logging.info('Emission >= 8: arc')
+                        # self.digibot.arc(x + self.rnd(incoming_command) / 10,
+                        #                  y + self.rnd(incoming_command) / 10,
+                        #                  z, 0,
+                        #                  x + self.rnd(incoming_command) / 10,
+                        #                  y + self.rnd(incoming_command) / 10,
+                        #                  z, 0,
+                        #                  False)
+                        logging.info('Emission >= 8: arc')
 
                     #
                     # MID power response
                     #
                     else:
+                        """between 2 and 8 make shapes in situ"""
                         # randomly choose from the following c hoices
                         randchoice = randrange(6)
                         logging.debug(f'randchoice == {randchoice}')
 
                         # 0= line to somewhere
                         if randchoice == 0:
-                            self.digibot.move_to(x + self.rnd(incoming_command * 10),
-                                                 y + self.rnd(incoming_command * 10),
+                            self.digibot.move_to(x + self.rnd(incoming_command),
+                                                 y + self.rnd(incoming_command),
                                                  z, 0,
-                                                 False)
+                                                 True)
                             logging.info('Emission 3-8: draw line')
 
                         # 1 = messy squiggles
@@ -281,15 +291,19 @@ class Main:
                             self.digibot.squiggle(squiggle_list)
                             logging.info('Emission 3-8: small squiggle')
 
-                        # 2 = dot
+                        # 2 = dot & line
                         elif randchoice == 2:
                             self.digibot.dot()
+                            self.digibot.move_to(x + self.rnd(incoming_command),
+                                                 y + self.rnd(incoming_command),
+                                                 z, 0,
+                                                 True)
                             logging.info('Emission 3-8: dot')
 
                         # 3 = note head
                         elif randchoice == 3:
                             note_size = randrange(5)
-                            note_shape = randrange(20)
+                            # note_shape = randrange(20)
                             self.digibot.note_head(size=note_size)
                             logging.info('Emission 3-8: note head')
 
@@ -297,28 +311,32 @@ class Main:
                         elif randchoice == 4:
                             note_size = randrange(1, 10)
                             self.digibot.note_head(size=note_size)
-                            self.digibot.move_to(x + self.rnd(incoming_command * 10),
-                                                 y + self.rnd(incoming_command * 10),
+                            self.digibot.move_to(x + self.rnd(incoming_command),
+                                                 y + self.rnd(incoming_command),
                                                  z, 0,
-                                                 False)
+                                                 True)
                             logging.info('Emission 3-8: note head and line')
 
-                        # 5 = dot and random Y
+                        # 5 = dot
                         elif randchoice == 5:
                             self.digibot.dot()
-                            self.move_y_random()
+                            # self.move_y_random()
                             logging.info('Emission 3-8: dot and line')
 
                     # take a breath
                     # sleep(self.global_speed)
 
                 # wait a bit until the new emission is different from current
-                self.move_y()
-                # sleep(self.global_speed)
+            # self.move_y()
+            sleep(0.1) # self.global_speed)
 
         logging.info('quitting dobot director thread')
 
 
 if __name__ == "__main__":
-    Main(duration_of_piece=380, continuous_line=True, speed=5, staves=1)
+    Main(duration_of_piece=380,
+         continuous_line=False,
+         speed=5,
+         staves=1,
+         pen=False)
 

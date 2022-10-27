@@ -157,7 +157,7 @@ class Digibot(Dobot):
 
     def dot(self):
         """draws a small dot at current position"""
-        self.note_head(0.1)
+        self.note_head(1)
 
     def note_head(self, size: float = 5):
         """draws a circle at the current position.
