@@ -23,6 +23,7 @@ class Digibot(Dobot):
 
         # make a shared list/ dict
         self.ready_position = [250, -175, 20, 0]
+        self.draw_position = [250, -175, 0, 0]
         self.end_position = (250, 175, 20, 0)
 
         print('locating home')
@@ -49,15 +50,16 @@ class Digibot(Dobot):
 
         if staves >= 1:
             # draw a line/ stave
-            for stave in range(staves - 1):
+            for stave in range(staves):
                 print(f'drawing stave {stave + 1} out of {staves}')
                 self.move_to(x, y_end, z, r)
 
                 if staves > 1:
                     # reset to RH and draw the rest
                     x += stave_gap
-                    self.jump_to(x, y_start, z, r)
-                    self.move_to(x, y_end, z, r)
+
+                    if (stave + 1) < staves:
+                        self.jump_to(x, y_start, z, r)
         else:
             self.jump_to(x, y_end, z, r)
 
@@ -114,6 +116,11 @@ class Digibot(Dobot):
     def go_position_ready(self):
         """moves directly to pre-defined position 'Ready Position'"""
         x, y, z, r = self.ready_position[:4]
+        self.move_to(x, y, z, r, wait=True)
+
+    def go_position_draw(self):
+        """moves directly to pre-defined position 'Ready Position'"""
+        x, y, z, r = self.draw_position[:4]
         self.move_to(x, y, z, r, wait=True)
 
     def go_position_end(self):
