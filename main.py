@@ -1,11 +1,9 @@
 from time import sleep, time
 from threading import Thread
-from random import random, randrange, getrandbits
 import pyaudio
 import numpy as np
 import logging
 from serial.tools import list_ports
-from queue import Queue
 
 from digibot import Digibot
 from nebula.nebula import Nebula
@@ -33,7 +31,7 @@ class Main:
         # config logging for all modules
         logging.basicConfig(level=logging.INFO)
 
-        # build iniital dataclas
+        # build initial dataclas
         # build the dataclass and fill with random number
         self.datadict = NebulaDataClass()
         logging.debug(f'Data dict initial values are = {self.datadict}')
@@ -53,23 +51,12 @@ class Main:
                                staves=staves,
                                pen=pen
                                )
-        # arm_speed = (((speed - 1) * (300 - 50)) / (10 - 1)) + 50
-        # self.digibot.speed(velocity=arm_speed,
-        #                    acceleration=arm_speed)
-        # self.digibot.draw_stave(staves=staves)
-        # self.digibot.go_position_ready()
-
-        # find global speed 0.1 - 1 (reverse of speed)
-        # # NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
-        # self.global_speed = ((speed - 1) * (0.1 - 1) / (10 - 1)) + 1
-        # print(f'user def speed = {speed}, global speed = {self.global_speed}')
-        # self.dobot_commands_queue = Queue(maxsize=1)
 
         # start Nebula AI Factory
         self.nebula = Nebula(datadict=self.datadict,
                              speed=speed
                              )
-        self.nebula.director()
+        self.nebula.main_loop()
 
         # set up mic listening funcs
         self.CHUNK = 2 ** 11
@@ -80,15 +67,11 @@ class Main:
                                   rate=self.RATE,
                                   input=True,
                                   frames_per_buffer=self.CHUNK)
-        #
+
         # # start operating vars
-        # self.duration_of_piece = duration_of_piece
-        # self.continuous_line = continuous_line
         self.running = True
-        # self.old_value = 0
         self.start_time = time()
         self.end_time = self.start_time + duration_of_piece
-        # self.pen = pen
 
         # start the bot listening and drawing threads
         listener_thread = Thread(target=self.listener)
@@ -125,8 +108,6 @@ class Main:
 
             # put normalised amplitude into Nebula's dictionary for use
             setattr(self.datadict, 'user_in', normalised_peak)
-            # self.nebula.user_input(normalised_peak)
-            # print('listner output', normalised_peak)
         logging.info('quitting listener thread')
 
     def terminate(self):

@@ -67,23 +67,15 @@ class Nebula:
         # Build the AI factory and pass it the data dict
         self.AI_factory = AIFactory(self.datadict, speed)
 
-        # Start affect listener
-        # self.affect = Affect(dobot_commands_queue, self.datadict, speed)
-
-    def director(self):
+    def main_loop(self):
         """Starts the server/ AI threads
          and gets the data rolling."""
         print('Starting the Nebula Director')
         # declares all threads
         t1 = Thread(target=self.AI_factory.make_data)
-        # t2 = Thread(target=self.affect.thought_train)
-
-        # assigns them a daemon
-        # t1.daemon = True
 
         # start them all
         t1.start()
-        # t2.start()
 
     #################################
     #
@@ -101,12 +93,12 @@ class Nebula:
     #     return self.affect.live_emission_data
     #     # return getattr(self.datadict, 'master_output')
 
-    def user_input(self, user_input_value: float):
-        """High-level input from client usually from
-        real-time percept.
-        Must be normalised 0.0-1.0"""
-        print('Nebula user input', user_input_value)
-        setattr(self.datadict, 'user_in', user_input_value)
+    # def user_input(self, user_input_value: float):
+    #     """High-level input from client usually from
+    #     real-time percept.
+    #     Must be normalised 0.0-1.0"""
+    #     print('Nebula user input', user_input_value)
+    #     setattr(self.datadict, 'user_in', user_input_value)
 
     def terminate(self):
         # self.affect.quit()
@@ -116,10 +108,4 @@ if __name__ == '__main':
     logging.basicConfig(level=logging.INFO)
     test = Nebula()
     test.director()
-    if not q.empty():
-        emission_val = q.get()
-        print(emission_val)
-    else:
-        sleep(0.1)
-        test.user_input(random())
 

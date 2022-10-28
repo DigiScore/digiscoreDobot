@@ -102,12 +102,6 @@ class Digibot(Dobot):
 
         # 1. daddy cycle: top level cycle lasting 6-26 seconds
         while self.running:
-            # # check end of duration
-            # if time() > self.end_time:
-            #     self.terminate()
-            #     self.running = False
-            #     break
-
             # flag for breaking on big affect signal
             self.interrupt_bang = True
 
@@ -216,17 +210,8 @@ class Digibot(Dobot):
 
                         self.move_y()
 
-                    # # get current rhythm_rate from datadict
-                    # rhythm_rate = getattr(self.datadict, 'rhythm_rate')
-
                     # and wait for a cycle
                     sleep(rhythm_rate)
-
-            #     # and wait for a cycle
-            #     sleep(rhythm_rate)
-            #
-            # # and wait for a cycle
-            # sleep(rhythm_rate)
 
         logging.info('quitting dobot director thread')
 
