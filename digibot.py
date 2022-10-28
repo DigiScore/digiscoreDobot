@@ -45,10 +45,11 @@ class Digibot(Dobot):
         self.continuous_line = continuous_line
         self.running = True
         self.old_value = 0
-        self.start_time = time()
-        self.end_time = self.start_time + duration_of_piece
+        self.local_start_time = time()
+        # self.end_time = self.start_time + duration_of_piece
         self.pen = pen
 
+        # calculate the inverse of speed
         # NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
         self.global_speed = ((speed - 1) * (0.1 - 1) / (10 - 1)) + 1
         print(f'user def speed = {speed}, global speed = {self.global_speed}')
@@ -63,7 +64,7 @@ class Digibot(Dobot):
         self.draw_position = [250, -175, 0, 0]
         self.end_position = (250, 175, 20, 0)
 
-        self.start_time = time()
+        # self.start_time = time()
 
         print('locating home')
         self.home()
@@ -101,17 +102,17 @@ class Digibot(Dobot):
 
         # 1. daddy cycle: top level cycle lasting 6-26 seconds
         while self.running:
-            # check end of duration
-            if time() > self.end_time:
-                self.terminate()
-                self.running = False
-                break
+            # # check end of duration
+            # if time() > self.end_time:
+            #     self.terminate()
+            #     self.running = False
+            #     break
 
             # flag for breaking on big affect signal
             self.interrupt_bang = True
 
             # Top level calc master cycle before a change
-            master_cycle = (randrange(600, 2600) / 100) + self.global_speed
+            master_cycle = (randrange(600, 2600) / 100) # + self.global_speed
             loop_end = time() + master_cycle
 
             logging.debug('\t\t\t\t\t\t\t\t=========AFFECT - Daddy cycle started ===========')
@@ -119,24 +120,25 @@ class Digibot(Dobot):
 
             # 2. child cycle: waiting for interrupt  from master clock
             while time() < loop_end:
+                # if a major break out then go to Daddy cycle and restart
+                if not self.interrupt_bang:
+                    break
+
                 print('================')
 
                 # 1. clear the alarms
                 self.clear_alarms()
+                self.move_y()
 
                 # calc rhythmic intensity based on self-awareness factor & global speed
                 intensity = getattr(self.datadict, 'self_awareness')
                 logging.debug(f'////////////////////////   intensity =  {intensity}')
 
                 rhythm_rate = (randrange(10,
-                                         80) / 100)  # / self.global_speed  # round(((rhythm_rate / intensity) * self.global_speed), 2) # / 10  # rhythm_rate * self.global_speed
+                                         80) / 100) * self.global_speed
                 # self.datadict['rhythm_rate'] = rhythm_rate
                 setattr(self.datadict, 'rhythm_rate', rhythm_rate)
-                logging.debug(f'////////////////////////   rhythm rate = {rhythm_rate}')
-
-                # if a major break out then go to Daddy cycle and restart
-                if not self.interrupt_bang:
-                    break
+                logging.info(f'////////////////////////   rhythm rate = {rhythm_rate}')
 
                 logging.debug('\t\t\t\t\t\t\t\t=========Hello - child cycle 1 started ===========')
 
@@ -205,7 +207,7 @@ class Digibot(Dobot):
                         self.mid_energy_response(peak_int)
 
                         # A. jumps out of current local loop, but not main one
-                        break
+                        # break
 
                     # LOW
                     # nothing happens here
@@ -218,13 +220,13 @@ class Digibot(Dobot):
                     # rhythm_rate = getattr(self.datadict, 'rhythm_rate')
 
                     # and wait for a cycle
-                    sleep(0.1)
+                    sleep(rhythm_rate)
 
-                # and wait for a cycle
-                sleep(0.1)
-
-            # and wait for a cycle
-            sleep(0.1)
+            #     # and wait for a cycle
+            #     sleep(rhythm_rate)
+            #
+            # # and wait for a cycle
+            # sleep(rhythm_rate)
 
         logging.info('quitting dobot director thread')
 
@@ -252,9 +254,9 @@ class Digibot(Dobot):
         if randchoice == 1:
             squiggle_list = []
             for n in range(randrange(2, 4)):
-                squiggle_list.append((randrange(-5, 5) / 10,
-                                      randrange(-5, 5) / 10,
-                                      randrange(-5, 5) / 10)
+                squiggle_list.append((randrange(-5, 5) / 5,
+                                      randrange(-5, 5) / 5,
+                                      randrange(-5, 5) / 5)
                                      )
             self.squiggle(squiggle_list)
             logging.info('Emission 3-8: small squiggle')
@@ -326,7 +328,7 @@ class Digibot(Dobot):
         """When called moves the pen across the y-axis
         aligned to the delta change in time across the duration of the piece"""
         # How far into the piece
-        elapsed = time() - self.start_time
+        elapsed = time() - self.local_start_time
 
         # get current y-value
         (x, y, z, r, j1, j2, j3, j4) = self.pose()
@@ -343,7 +345,7 @@ class Digibot(Dobot):
             if getrandbits(1):
                 z = 0
             else:
-                z = randrange(-2, 2)
+                z = randrange(-1, 1)
 
         # which mode
         if self.continuous_line:
@@ -356,7 +358,7 @@ class Digibot(Dobot):
     def move_y_random(self):
         """Moves x and y pen position to nearly the true Y point."""
         # How far into the piece
-        elapsed = time() - self.start_time
+        elapsed = time() - self.local_start_time
 
         # get current y-value
         (x, y, z, r, j1, j2, j3, j4) = self.pose()
