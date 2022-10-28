@@ -1,35 +1,383 @@
+# install python modules
 import sys
 import os
-import math
 import struct
 from time import time, sleep
 from serial.tools import list_ports
+from random import randrange, getrandbits, random
+import logging
+from dataclasses import fields
+
+
+# install dobot modules
 from pydobot import Dobot
 from pydobot.enums import PTPMode
 from pydobot.message import Message
 from pydobot.enums.ControlValues import ControlValues
 from pydobot.enums.CommunicationProtocolIDs import CommunicationProtocolIDs
 
+# install Nebula modules
+from nebula.nebula_dataclass import NebulaDataClass
 
 class Digibot(Dobot):
     """Controls movement and shapes drawn by Dobot.
     Inherets all the functions of Pydobot, and chances a few"""
 
-    def __init__(self, port, verbose: bool = False):
+    def __init__(self, port,
+                 datadict: NebulaDataClass,
+                 verbose: bool = False,
+                 duration_of_piece: int = 120,
+                 continuous_line: bool = True,
+                 speed: int = 5,
+                 staves: int = 1,
+                 pen: bool = True,
+                 ):
         super().__init__(port, verbose)
 
         # set global path
         sys.path.insert(0, os.path.abspath('.'))
+
+        # own the dataclass
+        self.datadict = datadict
+
+        # start operating vars
+        self.duration_of_piece = duration_of_piece
+        self.continuous_line = continuous_line
+        self.running = True
+        self.old_value = 0
+        self.start_time = time()
+        self.end_time = self.start_time + duration_of_piece
+        self.pen = pen
+
+        # NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
+        self.global_speed = ((speed - 1) * (0.1 - 1) / (10 - 1)) + 1
+        print(f'user def speed = {speed}, global speed = {self.global_speed}')
+
+        # # find available ports and locate Dobot (-1)
+        # available_ports = list_ports.comports()
+        # print(f'available ports: {[x.device for x in available_ports]}')
+        # port = available_ports[-1].device
 
         # make a shared list/ dict
         self.ready_position = [250, -175, 20, 0]
         self.draw_position = [250, -175, 0, 0]
         self.end_position = (250, 175, 20, 0)
 
+        self.start_time = time()
+
         print('locating home')
         self.home()
         input('remove pen, then press enter')
 
+        arm_speed = (((speed - 1) * (300 - 50)) / (10 - 1)) + 50
+        self.speed(velocity=arm_speed,
+                   acceleration=arm_speed)
+        self.draw_stave(staves=staves)
+        self.go_position_ready()
+
+
+    ######################
+    # DRAWBOT CONTROLS
+    ######################
+    """Mid level functions for operating the drawing and moving 
+    functions of the Dobot"""
+
+    def drawbot_control(self):
+        """Listens to the realtime incoming signal that is stored in the dataclass ("user_input")
+        and calculates an affectual response based on general boundaries:
+            HIGH - if input stream is LOUD (0.8+) then emit, smash a random fill and break out to Daddy cycle...
+            MEDIUM - if input energy is 0.3-0.8 then emit, a jump out of child loop
+            LOW - nothing happens, continues with cycles
+        """
+
+        print("Started dobot control thread")
+        self.go_position_draw()
+
+        # names for affect listening
+        self.affectnames = ['user_in',
+                            'rnd_poetry',
+                            'affect_net',
+                            'self_awareness']
+
+        # 1. daddy cycle: top level cycle lasting 6-26 seconds
+        while self.running:
+            print('================')
+            # check end of duration
+            if time() > self.end_time:
+                self.terminate()
+                self.running = False
+                break
+
+            # flag for breaking on big affect signal
+            self.interrupt_bang = True
+
+            # Top level calc master cycle before a change
+            master_cycle = (randrange(600, 2600) / 100) + self.global_speed
+            loop_end = time() + master_cycle
+
+            logging.debug('\t\t\t\t\t\t\t\t=========AFFECT - Daddy cycle started ===========')
+            logging.debug(f"                 interrupt_listener: started! Duration =  {master_cycle} seconds")
+
+            # 2. child cycle: waiting for interrupt  from master clock
+            while time() < loop_end:
+                # 1. clear the alarms
+                self.clear_alarms()
+
+                # calc rhythmic intensity based on self-awareness factor & global speed
+                intensity = getattr(self.datadict, 'self_awareness')
+                logging.debug(f'////////////////////////   intensity =  {intensity}')
+
+                rhythm_rate = (randrange(10,
+                                         80) / 100)  # / self.global_speed  # round(((rhythm_rate / intensity) * self.global_speed), 2) # / 10  # rhythm_rate * self.global_speed
+                # self.datadict['rhythm_rate'] = rhythm_rate
+                setattr(self.datadict, 'rhythm_rate', rhythm_rate)
+                logging.debug(f'////////////////////////   rhythm rate = {rhythm_rate}')
+
+                # if a major break out then go to Daddy cycle and restart
+                if not self.interrupt_bang:
+                    break
+
+                logging.debug('\t\t\t\t\t\t\t\t=========Hello - child cycle 1 started ===========')
+
+                # randomly pick an input stream for this cycle
+                # either user_in, random, net generation or self-awareness
+                rnd = randrange(4)
+                self.rnd_stream = self.affectnames[rnd]
+                setattr(self.datadict, 'affect_decision', self.rnd_stream)
+                logging.debug(f'Random stream choice = {self.rnd_stream}')
+
+                # hold this stream for 1-4 secs, unless interrupt bang
+                end_time = time() + (randrange(1000, 4000) / 1000)
+                logging.debug(f'end time = {end_time}')
+
+                # 3. baby cycle - own time loops
+                while time() < end_time:
+                    (x, y, z, r, j1, j2, j3, j4) = self.pose()
+                    logging.debug(f'Current position: x:{x} y:{y} z:{z} j1:{j1} j2:{j2} j3:{j3} j4:{j4}')
+
+                    logging.debug('\t\t\t\t\t\t\t\t=========Hello - baby cycle 2 ===========')
+
+                    # make the master output the current value of the affect stream
+                    # 1. go get the current value from dict
+                    thought_train = getattr(self.datadict, self.rnd_stream)
+                    logging.info(f'Affect stream current input value from {self.rnd_stream} == {thought_train}')
+
+                    # 2. send to Master Output
+                    setattr(self.datadict, 'master_output', thought_train)
+                    logging.info(f'\t\t ==============  thought_train output = {thought_train}')
+
+                    # # 3. emit to the client at various points in the affect cycle
+                    # self.emitter(thought_train)
+
+                    ###############################################
+                    #
+                    # test realtime input against the affect matrix
+                    # behave as required
+                    #
+                    ###############################################
+
+                    # 1. get current mic level
+                    peak = getattr(self.datadict, "user_in")
+                    logging.debug(f'testing current mic level for affect = {peak}')
+
+                    # 2. calc affect on behaviour
+                    # LOUD
+                    # if input stream is LOUD then smash a random fill and break out to Daddy cycle...
+                    if peak > 0.8:
+                        logging.debug('interrupt > HIGH !!!!!!!!!')
+
+                        # A - refill dict with random
+                        self.random_dict_fill()
+
+                        # B - jumps out of this loop into daddy
+                        self.interrupt_bang = False
+
+                        # C - respond
+                        self.high_energy_response()
+
+                        # D- break out of this loop, and next (cos of flag)
+                        break
+
+                    # MEDIUM
+                    # if middle loud fill dict with random, all processes norm
+                    elif 0.3 < peak < 0.8:
+                        logging.debug('interrupt MIDDLE -----------')
+
+                        self.mid_energy_response(peak)
+
+                        # A. jumps out of current local loop, but not main one
+                        break
+
+                    # LOW
+                    # nothing happens here
+                    elif peak <= 0.3:
+                        logging.debug('interrupt LOW ----------- no action')
+
+                    # # get current rhythm_rate from datadict
+                    # rhythm_rate = getattr(self.datadict, 'rhythm_rate')
+
+                    # and wait for a cycle
+                    sleep(rhythm_rate)
+
+                # and wait for a cycle
+                sleep(rhythm_rate)
+
+            # and wait for a cycle
+            sleep(rhythm_rate)
+
+        logging.info('quitting dobot director thread')
+
+    # def level_2_cycle(self):
+    #
+
+    def mid_energy_response(self, peak):
+        peak *= 10
+
+        """between 2 and 8 make shapes in situ"""
+        # randomly choose from the following c hoices
+        randchoice = randrange(6)
+        logging.debug(f'randchoice == {randchoice}')
+
+        # 0= line to somewhere
+        if randchoice == 0:
+            self.move_to(x + self.rnd(peak),
+                                 y + self.rnd(peak),
+                                 z, 0,
+                                 True)
+            logging.info('Emission 3-8: draw line')
+
+        # 1 = messy squiggles
+        if randchoice == 1:
+            squiggle_list = []
+            for n in range(randrange(2, 4)):
+                squiggle_list.append((randrange(-5, 5) / 10,
+                                      randrange(-5, 5) / 10,
+                                      randrange(-5, 5) / 10)
+                                     )
+            self.squiggle(squiggle_list)
+            logging.info('Emission 3-8: small squiggle')
+
+        # 2 = dot & line
+        elif randchoice == 2:
+            self.dot()
+            self.move_to(x + self.rnd(peak),
+                                 y + self.rnd(peak),
+                                 z, 0,
+                                 True)
+            logging.info('Emission 3-8: dot')
+
+        # 3 = note head
+        elif randchoice == 3:
+            note_size = randrange(5)
+            # note_shape = randrange(20)
+            self.note_head(size=note_size)
+            logging.info('Emission 3-8: note head')
+
+        # 4 = note head and line
+        elif randchoice == 4:
+            note_size = randrange(1, 10)
+            self.note_head(size=note_size)
+            self.move_to(x + self.rnd(peak),
+                                 y + self.rnd(peak),
+                                 z, 0,
+                                 True)
+            logging.info('Emission 3-8: note head and line')
+
+        # 5 = dot
+        elif randchoice == 5:
+            self.dot()
+            # self.move_y_random()
+            logging.info('Emission 3-8: dot and line')
+
+    def high_energy_response(self):
+        """move to a random x, y position"""
+        self._set_queued_cmd_clear()
+        self.move_y_random()
+
+    def random_dict_fill(self):
+        """Fills the working dataclass with random values. Generally called when
+        affect energy is highest"""
+        for field in fields(self.datadict):
+            # print(field.name)
+            rnd = random()
+            setattr(self.datadict, field.name, rnd)
+        logging.debug(f'Data dict new random values are = {self.datadict}')
+
+    def terminate(self):
+        """Smart collapse of all threads and comms"""
+        print('TERMINATING')
+        self.home()
+        self.close()
+        self.running = False
+
+    def rnd(self, power_of_command: int) -> int:
+        """Returns a randomly generated + or - integer,
+        influenced by the incoming power factor"""
+        pos = 1
+        if getrandbits(1):
+            pos = -1
+        result = (randrange(1, 5) + randrange(power_of_command)) * pos
+        logging.debug(f'Rnd result = {result}')
+        return result
+
+    def move_y(self):
+        """When called moves the pen across the y-axis
+        aligned to the delta change in time across the duration of the piece"""
+        # How far into the piece
+        elapsed = time() - self.start_time
+
+        # get current y-value
+        (x, y, z, r, j1, j2, j3, j4) = self.pose()
+        # NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
+        newy = (((elapsed - 0) * (175 - -175)) / (self.duration_of_piece - 0)) + -175
+        logging.debug(f'x:{x} y:{y} z:{z} j1:{j1} j2:{j2} j3:{j3} j4:{j4}')
+
+        # check x-axis is in range
+        if x <= 200 or x >= 300:
+            x = 250
+
+        # move z (pen head) a little
+        if self.pen:
+            if getrandbits(1):
+                z = 0
+            else:
+                z = randrange(-2, 2)
+
+        # which mode
+        if self.continuous_line:
+            self.move_to(x, newy, z, r, True)
+        else:
+            self.jump_to(x, newy, z, r, True)
+
+        logging.info(f'Move Y to x:{round(x)} y:{round(newy)} z:{round(z)}')
+
+    def move_y_random(self):
+        """Moves x and y pen position to nearly the true Y point."""
+        # How far into the piece
+        elapsed = time() - self.start_time
+
+        # get current y-value
+        (x, y, z, r, j1, j2, j3, j4) = self.pose()
+        # NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
+        newy = ((((elapsed - 0) * (175 - -175)) / (self.duration_of_piece - 0)) + -175) + self.rnd(100)
+        logging.debug(f'x:{x} y:{y} z:{z} j1:{j1} j2:{j2} j3:{j3} j4:{j4}')
+
+        # check x-axis is in range
+        newx = x + self.rnd(100)
+        if newx <= 200 or newx >= 300:
+            newx = 250
+
+        # which mode
+        if self.continuous_line:
+            self.move_to(newx, newy, 0, r, True)
+        else:
+            self.jump_to(newx, newy, 0, r, True)
+
+
+    ######################
+    # DIGIBOT CONTROLS
+    ######################
+    """Low level functions for communicating direct to the Dobot"""
     def draw_stave(self, staves: int = 1):
         """Draws a  line across the middle of an A3 paper, symbolising a stave.
         Has optional function to draw multiple staves.
@@ -169,21 +517,6 @@ class Digibot(Dobot):
 
         (x, y, z, r, j1, j2, j3, j4) = self.pose()
         self.arc(x + size, y, z, r, x + 0.01, y + 0.01, z, r)
-        #
-        # center = self.pose()
-        # # print('Center:', center)
-        # # self.bot.interface.set_continous_trajectory_params(200, 200, 200)
-        #
-        # # Draw circle
-        # path = []
-        # steps = steps
-        # scale = size
-        # for i in range(steps + 1):
-        #     x = math.cos(((math.pi * 2) / steps) * i)
-        #     y = math.sin(((math.pi * 2) / steps) * i)
-        #     path.append([center[0] + x * scale, center[1] + y * scale, center[2]])
-        # self.follow_path(path)
-        # self.move_to(center[0], center[1], center[2], center[3])
 
 
 if __name__ == "__main__":

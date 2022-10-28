@@ -6,7 +6,7 @@ import numpy as np
 from time import sleep
 
 # install Nebula modules
-from nebula.nebula_dataclass import NebulaDataClass
+from nebula_dataclass import NebulaDataClass
 
 
 class AIFactory:
@@ -30,15 +30,15 @@ class AIFactory:
 
         # instantiate nets as objects and make  models
         print('MoveRNN initialization')
-        self.move_net = tf.keras.models.load_model('nebula/models/EMR-full-sept-2021_RNN_skeleton_data.nose.x.h5')
+        self.move_net = tf.keras.models.load_model('models/EMR-full-sept-2021_RNN_skeleton_data.nose.x.h5')
         print('AffectRNN initialization')
-        self.affect_net = tf.keras.models.load_model('nebula/models/EMR-full-sept-2021_RNN_bitalino.h5')
+        self.affect_net = tf.keras.models.load_model('models/EMR-full-sept-2021_RNN_bitalino.h5')
         print('MoveAffectCONV2 initialization')
-        self.move_affect_net = tf.keras.models.load_model('nebula/models/EMR-full-sept-2021_conv2D_move-affect.h5')
+        self.move_affect_net = tf.keras.models.load_model('models/EMR-full-sept-2021_conv2D_move-affect.h5')
         print('AffectMoveCONV2 initialization')
-        self.affect_move_net = tf.keras.models.load_model('nebula/models/EMR-full-sept-2021_conv2D_affect-move.h5')
+        self.affect_move_net = tf.keras.models.load_model('models/EMR-full-sept-2021_conv2D_affect-move.h5')
         print('MoveAffectCONV2 initialization')
-        self.affect_perception = tf.keras.models.load_model('nebula/models/EMR-full-sept-2021_conv2D_move-affect.h5')
+        self.affect_perception = tf.keras.models.load_model('models/EMR-full-sept-2021_conv2D_move-affect.h5')
 
         tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
@@ -62,7 +62,7 @@ class AIFactory:
         # now spin the plate and do its own ting
         while self.running:
             # get the first rhythm rate from the datadict
-            rhythm_rate = getattr(self.datadict, 'rhythm_rate') + self.global_speed
+            rhythm_rate = getattr(self.datadict, 'rhythm_rate') # + self.global_speed
 
             # PATCH BOARD - CROSS PLUGS NET OUTPUTS TO INPUTS
             # get input vars from dict (NB not always self)
@@ -97,7 +97,7 @@ class AIFactory:
             self.put_pred(3, pred4)
             self.put_pred(4, self_aware_pred)
 
-            sleep(0.1) # rhythm rate
+            sleep(rhythm_rate)
 
     # function to get input value for net prediction from dictionary
     def get_in_val(self, which_dict):

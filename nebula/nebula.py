@@ -48,7 +48,10 @@ class Nebula:
     Args:
         speed: general tempo/ feel of Nebula's response (0.5 ~ moderate fast, 1 ~ moderato; 2 ~ presto)"""
 
-    def __init__(self, dobot_commands_queue, speed=1):
+    def __init__(self,
+                 datadict: NebulaDataClass,
+                 speed=1,
+                 ):
         print('building engine server')
 
         # Set global vars
@@ -58,14 +61,14 @@ class Nebula:
         self.affect_listen = 0
 
         # build the dataclass and fill with random number
-        self.datadict = NebulaDataClass()
+        self.datadict = datadict
         logging.debug(f'Data dict initial values are = {self.datadict}')
 
         # Build the AI factory and pass it the data dict
         self.AI_factory = AIFactory(self.datadict, speed)
 
         # Start affect listener
-        self.affect = Affect(dobot_commands_queue, self.datadict, speed)
+        # self.affect = Affect(dobot_commands_queue, self.datadict, speed)
 
     def director(self):
         """Starts the server/ AI threads
@@ -73,14 +76,14 @@ class Nebula:
         print('Starting the Nebula Director')
         # declares all threads
         t1 = Thread(target=self.AI_factory.make_data)
-        t2 = Thread(target=self.affect.thought_train)
+        # t2 = Thread(target=self.affect.thought_train)
 
         # assigns them a daemon
-        t1.daemon = True
+        # t1.daemon = True
 
         # start them all
         t1.start()
-        t2.start()
+        # t2.start()
 
     #################################
     #
@@ -93,10 +96,10 @@ class Nebula:
         """This list is highest level comms back to client """
         return self.emission_list
 
-    def user_live_emission_data(self):
-        """Returns the current value of the AI factory master output"""
-        return self.affect.live_emission_data
-        # return getattr(self.datadict, 'master_output')
+    # def user_live_emission_data(self):
+    #     """Returns the current value of the AI factory master output"""
+    #     return self.affect.live_emission_data
+    #     # return getattr(self.datadict, 'master_output')
 
     def user_input(self, user_input_value: float):
         """High-level input from client usually from
@@ -105,13 +108,12 @@ class Nebula:
         setattr(self.datadict, 'user_in', user_input_value)
 
     def terminate(self):
-        self.affect.quit()
+        # self.affect.quit()
         self.AI_factory.quit()
 
 if __name__ == '__main':
     logging.basicConfig(level=logging.INFO)
-    q = Queue()
-    test = Nebula(q)
+    test = Nebula()
     test.director()
     if not q.empty():
         emission_val = q.get()
