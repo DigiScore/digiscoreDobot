@@ -6,7 +6,7 @@ import numpy as np
 from time import sleep
 
 # install Nebula modules
-from nebula_dataclass import NebulaDataClass
+from nebula.nebula_dataclass import NebulaDataClass
 
 
 class AIFactory:
@@ -30,15 +30,15 @@ class AIFactory:
 
         # instantiate nets as objects and make  models
         print('MoveRNN initialization')
-        self.move_net = tf.keras.models.load_model('models/EMR-full-sept-2021_RNN_skeleton_data.nose.x.h5')
+        self.move_net = tf.keras.models.load_model('nebula/models/EMR-full-sept-2021_RNN_skeleton_data.nose.x.h5')
         print('AffectRNN initialization')
-        self.affect_net = tf.keras.models.load_model('models/EMR-full-sept-2021_RNN_bitalino.h5')
+        self.affect_net = tf.keras.models.load_model('nebula/models/EMR-full-sept-2021_RNN_bitalino.h5')
         print('MoveAffectCONV2 initialization')
-        self.move_affect_net = tf.keras.models.load_model('models/EMR-full-sept-2021_conv2D_move-affect.h5')
+        self.move_affect_net = tf.keras.models.load_model('nebula/models/EMR-full-sept-2021_conv2D_move-affect.h5')
         print('AffectMoveCONV2 initialization')
-        self.affect_move_net = tf.keras.models.load_model('models/EMR-full-sept-2021_conv2D_affect-move.h5')
+        self.affect_move_net = tf.keras.models.load_model('nebula/models/EMR-full-sept-2021_conv2D_affect-move.h5')
         print('MoveAffectCONV2 initialization')
-        self.affect_perception = tf.keras.models.load_model('models/EMR-full-sept-2021_conv2D_move-affect.h5')
+        self.affect_perception = tf.keras.models.load_model('nebula/models/EMR-full-sept-2021_conv2D_move-affect.h5')
 
         tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 

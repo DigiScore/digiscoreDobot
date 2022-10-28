@@ -23,7 +23,7 @@ from queue import Queue
 
 # import Nebula modules
 from nebula.ai_factory import AIFactory
-from nebula.affect import Affect
+# from nebula.affect import Affect
 from nebula.nebula_dataclass import NebulaDataClass
 
 class Nebula:
@@ -91,10 +91,10 @@ class Nebula:
     # will generally be used in a server thread
     #
     #################################
-
-    def user_emission_list(self):
-        """This list is highest level comms back to client """
-        return self.emission_list
+    #
+    # def user_emission_list(self):
+    #     """This list is highest level comms back to client """
+    #     return self.emission_list
 
     # def user_live_emission_data(self):
     #     """Returns the current value of the AI factory master output"""
@@ -105,6 +105,7 @@ class Nebula:
         """High-level input from client usually from
         real-time percept.
         Must be normalised 0.0-1.0"""
+        print('Nebula user input', user_input_value)
         setattr(self.datadict, 'user_in', user_input_value)
 
     def terminate(self):

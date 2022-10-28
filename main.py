@@ -35,8 +35,8 @@ class Main:
 
         # build iniital dataclas
         # build the dataclass and fill with random number
-        datadict = NebulaDataClass()
-        logging.debug(f'Data dict initial values are = {datadict}')
+        self.datadict = NebulaDataClass()
+        logging.debug(f'Data dict initial values are = {self.datadict}')
 
         # find available ports and locate Dobot (-1)
         available_ports = list_ports.comports()
@@ -45,7 +45,7 @@ class Main:
 
         # start dobot communications
         self.digibot = Digibot(port=port,
-                               datadict=datadict,
+                               datadict=self.datadict,
                                verbose=False,
                                duration_of_piece=duration_of_piece,
                                continuous_line=continuous_line,
@@ -66,7 +66,7 @@ class Main:
         # self.dobot_commands_queue = Queue(maxsize=1)
 
         # start Nebula AI Factory
-        self.nebula = Nebula(datadict=datadict,
+        self.nebula = Nebula(datadict=self.datadict,
                              speed=speed
                              )
         self.nebula.director()
@@ -119,7 +119,9 @@ class Main:
                 normalised_peak = 1.0
 
             # put normalised amplitude into Nebula's dictionary for use
-            self.nebula.user_input(normalised_peak)
+            setattr(self.datadict, 'user_in', normalised_peak)
+            # self.nebula.user_input(normalised_peak)
+            # print('listner output', normalised_peak)
         logging.info('quitting listener thread')
 
     # def terminate(self):
@@ -349,9 +351,9 @@ class Main:
 
 
 if __name__ == "__main__":
-    Main(duration_of_piece=380,
-         continuous_line=False,
-         speed=5,
-         staves=1,
-         pen=False)
+    Main(duration_of_piece=200,
+         continuous_line=True,
+         speed=10,
+         staves=0,
+         pen=True)
 

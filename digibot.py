@@ -101,7 +101,6 @@ class Digibot(Dobot):
 
         # 1. daddy cycle: top level cycle lasting 6-26 seconds
         while self.running:
-            print('================')
             # check end of duration
             if time() > self.end_time:
                 self.terminate()
@@ -120,6 +119,8 @@ class Digibot(Dobot):
 
             # 2. child cycle: waiting for interrupt  from master clock
             while time() < loop_end:
+                print('================')
+
                 # 1. clear the alarms
                 self.clear_alarms()
 
@@ -144,7 +145,7 @@ class Digibot(Dobot):
                 rnd = randrange(4)
                 self.rnd_stream = self.affectnames[rnd]
                 setattr(self.datadict, 'affect_decision', self.rnd_stream)
-                logging.debug(f'Random stream choice = {self.rnd_stream}')
+                logging.info(f'Random stream choice = {self.rnd_stream}')
 
                 # hold this stream for 1-4 secs, unless interrupt bang
                 end_time = time() + (randrange(1000, 4000) / 1000)
@@ -152,9 +153,6 @@ class Digibot(Dobot):
 
                 # 3. baby cycle - own time loops
                 while time() < end_time:
-                    (x, y, z, r, j1, j2, j3, j4) = self.pose()
-                    logging.debug(f'Current position: x:{x} y:{y} z:{z} j1:{j1} j2:{j2} j3:{j3} j4:{j4}')
-
                     logging.debug('\t\t\t\t\t\t\t\t=========Hello - baby cycle 2 ===========')
 
                     # make the master output the current value of the affect stream
@@ -178,13 +176,14 @@ class Digibot(Dobot):
 
                     # 1. get current mic level
                     peak = getattr(self.datadict, "user_in")
-                    logging.debug(f'testing current mic level for affect = {peak}')
+                    peak_int = int(peak * 10) + 1
+                    logging.info(f'testing current mic level for affect = {peak}, rounded to {peak_int}')
 
                     # 2. calc affect on behaviour
                     # LOUD
                     # if input stream is LOUD then smash a random fill and break out to Daddy cycle...
-                    if peak > 0.8:
-                        logging.debug('interrupt > HIGH !!!!!!!!!')
+                    if peak > 0.7:
+                        logging.info('interrupt > HIGH !!!!!!!!!')
 
                         # A - refill dict with random
                         self.random_dict_fill()
@@ -200,30 +199,32 @@ class Digibot(Dobot):
 
                     # MEDIUM
                     # if middle loud fill dict with random, all processes norm
-                    elif 0.3 < peak < 0.8:
-                        logging.debug('interrupt MIDDLE -----------')
+                    elif 0.1 < peak < 0.7:
+                        logging.info('interrupt MIDDLE -----------')
 
-                        self.mid_energy_response(peak)
+                        self.mid_energy_response(peak_int)
 
                         # A. jumps out of current local loop, but not main one
                         break
 
                     # LOW
                     # nothing happens here
-                    elif peak <= 0.3:
-                        logging.debug('interrupt LOW ----------- no action')
+                    elif peak <= 0.1:
+                        logging.info('interrupt LOW ----------- move Y')
+
+                        self.move_y()
 
                     # # get current rhythm_rate from datadict
                     # rhythm_rate = getattr(self.datadict, 'rhythm_rate')
 
                     # and wait for a cycle
-                    sleep(rhythm_rate)
+                    sleep(0.1)
 
                 # and wait for a cycle
-                sleep(rhythm_rate)
+                sleep(0.1)
 
             # and wait for a cycle
-            sleep(rhythm_rate)
+            sleep(0.1)
 
         logging.info('quitting dobot director thread')
 
@@ -231,7 +232,8 @@ class Digibot(Dobot):
     #
 
     def mid_energy_response(self, peak):
-        peak *= 10
+        (x, y, z, r, j1, j2, j3, j4) = self.pose()
+        logging.debug(f'Current position: x:{x} y:{y} z:{z} j1:{j1} j2:{j2} j3:{j3} j4:{j4}')
 
         """between 2 and 8 make shapes in situ"""
         # randomly choose from the following c hoices
@@ -243,7 +245,7 @@ class Digibot(Dobot):
             self.move_to(x + self.rnd(peak),
                                  y + self.rnd(peak),
                                  z, 0,
-                                 True)
+                                 False)
             logging.info('Emission 3-8: draw line')
 
         # 1 = messy squiggles
@@ -263,7 +265,7 @@ class Digibot(Dobot):
             self.move_to(x + self.rnd(peak),
                                  y + self.rnd(peak),
                                  z, 0,
-                                 True)
+                                 False)
             logging.info('Emission 3-8: dot')
 
         # 3 = note head
@@ -280,7 +282,7 @@ class Digibot(Dobot):
             self.move_to(x + self.rnd(peak),
                                  y + self.rnd(peak),
                                  z, 0,
-                                 True)
+                                 False)
             logging.info('Emission 3-8: note head and line')
 
         # 5 = dot
@@ -367,11 +369,11 @@ class Digibot(Dobot):
         if newx <= 200 or newx >= 300:
             newx = 250
 
-        # which mode
-        if self.continuous_line:
-            self.move_to(newx, newy, 0, r, True)
-        else:
-            self.jump_to(newx, newy, 0, r, True)
+        # # which mode
+        # if self.continuous_line:
+        #     self.move_to(newx, newy, 0, r, True)
+        # else:
+        self.jump_to(newx, newy, 0, r, True)
 
 
     ######################
