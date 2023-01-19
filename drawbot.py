@@ -96,7 +96,7 @@ def dobot_control(self):
                 self.old_value = live_emission_data
 
                 # multiply by 10 for local logic (power value)
-                incoming_command = int(live_emission_data * 10) + 1
+                incoming_command = int(live_emission_data * 10) + 10
                 logging.info(f"MAIN: emission value = {live_emission_data} == {incoming_command}")
 
                 # 1. clear the alarms
@@ -210,7 +210,7 @@ def dobot_control(self):
                 sleep(self.global_speed)
 
             # wait a bit until the new emission is different from current
-            self.move_y()
+            # self.move_y()
             sleep(self.global_speed)
 
     logging.info('quitting dobot director thread')

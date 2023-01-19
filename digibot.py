@@ -122,7 +122,7 @@ class Digibot(Dobot):
 
                 # 1. clear the alarms
                 self.clear_alarms()
-                self.move_y()
+                # self.move_y()
 
                 # calc rhythmic intensity based on self-awareness factor & global speed
                 intensity = getattr(self.datadict, 'self_awareness')
@@ -208,7 +208,7 @@ class Digibot(Dobot):
                     elif peak <= 0.1:
                         logging.info('interrupt LOW ----------- move Y')
 
-                        self.move_y()
+                        # self.move_y()
 
                     # and wait for a cycle
                     sleep(rhythm_rate)
