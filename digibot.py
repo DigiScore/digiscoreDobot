@@ -157,6 +157,7 @@ class Digibot(Dobot):
                     logging.info(f'Affect stream current input value from {self.rnd_stream} == {thought_train}')
 
                     # 2. send to Master Output
+                    # todo - does this still do this here? check out Jess+
                     setattr(self.datadict, 'master_output', thought_train)
                     logging.info(f'\t\t ==============  thought_train output = {thought_train}')
 
