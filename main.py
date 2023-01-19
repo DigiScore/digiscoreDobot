@@ -1,14 +1,14 @@
 from time import sleep, time
-from threading import Thread
+from threading import Thread, Timer
 import pyaudio
 import numpy as np
 import logging
 from serial.tools import list_ports
+import hid
 
 from digibot import Digibot
 from nebula.nebula import Nebula
 from nebula.nebula_dataclass import NebulaDataClass
-from joystick import Joystick
 
 class Main:
     """
@@ -60,31 +60,35 @@ class Main:
                              )
         self.nebula.main_loop()
 
+        # set up mic listening funcs
+        self.CHUNK = 2 ** 11
+        self.RATE = 44100
+        p = pyaudio.PyAudio()
+        self.stream = p.open(format=pyaudio.paInt16,
+                                  channels=1,
+                                  rate=self.RATE,
+                                  input=True,
+                                  frames_per_buffer=self.CHUNK)
+
+        # # start operating vars
+        # self.joystick = joystick
+        self.running = True
+        self.start_time = time()
+        self.end_time = self.start_time + duration_of_piece
+
+        # start the bot listening and drawing threads
+        listener_thread = Thread(target=self.listener)
+        listener_thread.start()
+
         if joystick:
-            joystick = Joystick()
-
+            gamepad = hid.device()
+            gamepad.open(0x0079, 0x0006)
+            gamepad.set_nonblocking(True)
+            gamepad_thread = Thread(target=self.digibot.joystick_control, args=(gamepad,))
+            gamepad_thread.start()
         else:
-            # set up mic listening funcs
-            self.CHUNK = 2 ** 11
-            self.RATE = 44100
-            p = pyaudio.PyAudio()
-            self.stream = p.open(format=pyaudio.paInt16,
-                                      channels=1,
-                                      rate=self.RATE,
-                                      input=True,
-                                      frames_per_buffer=self.CHUNK)
-
-            # # start operating vars
-            self.running = True
-            self.start_time = time()
-            self.end_time = self.start_time + duration_of_piece
-
-            # start the bot listening and drawing threads
-            listener_thread = Thread(target=self.listener)
-            listener_thread.start()
-
-        dobot_thread = Thread(target=self.digibot.drawbot_control)
-        dobot_thread.start()
+            dobot_thread = Thread(target=self.digibot.drawbot_control)
+            dobot_thread.start()
 
     def listener(self):
         """Loop thread that listens to live sound and analyses amplitude.

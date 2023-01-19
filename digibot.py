@@ -329,9 +329,9 @@ class Digibot(Dobot):
         # move z (pen head) a little
         if self.pen:
             if getrandbits(1):
-                z = 0
-            else:
                 z = randrange(-1, 1)
+            else:
+                z = 0
 
         # which mode
         if self.continuous_line:
@@ -363,6 +363,37 @@ class Digibot(Dobot):
         # else:
         self.jump_to(newx, newy, 0, r, True)
 
+    ######################
+    # JOYSTICK CONTROLS
+    ######################
+    def joystick_control(self, gamepad):
+        # scaling vars
+        old_min = 0
+        old_max = 255
+        new_min = -1
+        new_max = 1
+
+        print("Started JOYSTICK control thread")
+        self.go_position_draw()
+
+        # todo - join the buttons and sticks to different movements below
+        while self.running:
+            report = gamepad.read(64)
+            # print(report)
+            left_joysick_left_right = round((((report[0] - old_min) / (old_max - old_min)) * (new_max - new_min) + new_min), 2)
+            left_joysick_up_down = round((((report[1] - old_min) / (old_max - old_min)) * (new_max - new_min) + new_min), 2)
+            right_joysick_left_right = round((((report[3] - old_min) / (old_max - old_min)) * (new_max - new_min) + new_min), 2)
+            right_joysick_up_down = round((((report[4] - old_min) / (old_max - old_min)) * (new_max - new_min) + new_min), 2)
+            num_buttons = report[5]
+            all_other_buttons = report[6]
+
+            # print(left_joysick_left_right,
+            #       left_joysick_up_down,
+            #       right_joysick_left_right,
+            #       right_joysick_up_down,
+            #       num_buttons,
+            #       all_other_buttons)
+            sleep(0.1)
 
     ######################
     # DIGIBOT CONTROLS
