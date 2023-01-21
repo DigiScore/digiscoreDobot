@@ -367,6 +367,10 @@ class Digibot(Dobot):
     # JOYSTICK CONTROLS
     ######################
     def joystick_control(self, gamepad):
+        """ for use as a rapid prototyping tool in place of autonomous behaviour.
+        Left joystick move x & y axis,
+        right buttons activate differnt pre-defined moves
+        right trigger & bumper lifts pen"""
         # scaling vars
         old_min = 0
         old_max = 255
@@ -376,23 +380,79 @@ class Digibot(Dobot):
         print("Started JOYSTICK control thread")
         self.go_position_draw()
 
-        # todo - join the buttons and sticks to different movements below
         while self.running:
+            # get now position
+            [x, y, z, r] = self.pose()[0:4]
+
+            # read gamepad
             report = gamepad.read(64)
             # print(report)
-            left_joysick_left_right = round((((report[0] - old_min) / (old_max - old_min)) * (new_max - new_min) + new_min), 2)
-            left_joysick_up_down = round((((report[1] - old_min) / (old_max - old_min)) * (new_max - new_min) + new_min), 2)
-            right_joysick_left_right = round((((report[3] - old_min) / (old_max - old_min)) * (new_max - new_min) + new_min), 2)
-            right_joysick_up_down = round((((report[4] - old_min) / (old_max - old_min)) * (new_max - new_min) + new_min), 2)
+            left_joysick_left_right = round((((report[0] - old_min) / (old_max - old_min)) * (new_max - new_min) + new_min), 1)
+            left_joysick_up_down = round((((report[1] - old_min) / (old_max - old_min)) * (new_max - new_min) + new_min), 1)
+            right_joysick_left_right = round((((report[3] - old_min) / (old_max - old_min)) * (new_max - new_min) + new_min), 1)
+            right_joysick_up_down = round((((report[4] - old_min) / (old_max - old_min)) * (new_max - new_min) + new_min), 1)
             num_buttons = report[5]
             all_other_buttons = report[6]
+            logging.info(f"({left_joysick_left_right}, "
+                         f"{left_joysick_up_down}, "
+                         f"{right_joysick_left_right}, "
+                         f"{right_joysick_up_down}, "
+                         f"{num_buttons}, "
+                         f"{all_other_buttons})"
+                         )
 
-            # print(left_joysick_left_right,
-            #       left_joysick_up_down,
-            #       right_joysick_left_right,
-            #       right_joysick_up_down,
-            #       num_buttons,
-            #       all_other_buttons)
+            # move x axis
+            if left_joysick_left_right != 0:
+                if left_joysick_left_right > 0:
+                    direction = 1
+                else:
+                    direction = -1
+                self.move_to_relative(5 * direction, y, z, r)
+
+            # move y axis
+            if left_joysick_up_down != 0:
+                if left_joysick_up_down > 0:
+                    direction = 1
+                else:
+                    direction = -1
+                self.move_to_relative(x, 5 * direction, z, r)
+
+            # move pen z up or down
+            if all_other_buttons == 2:
+                self.move_to(x, y, -5, r)
+            elif all_other_buttons == 8:
+                self.move_to(x, y, 0, r)
+
+            # activate pre-defined movement
+            if num_buttons == 31:
+                self.high_energy_response()
+
+            elif num_buttons == 47:
+                squiggle_list = []
+                for n in range(randrange(2, 4)):
+                    squiggle_list.append((randrange(-5, 5) / 5,
+                                          randrange(-5, 5) / 5,
+                                          randrange(-5, 5) / 5)
+                                         )
+                self.squiggle(squiggle_list)
+
+            elif num_buttons == 79:
+                peak = int(random() * 10) + 1
+                self.dot()
+                self.move_to(x + self.rnd(peak),
+                             y + self.rnd(peak),
+                             z, 0,
+                             False)
+
+            elif num_buttons == 143:
+                peak = int(random() * 10) + 1
+                note_size = randrange(1, 10)
+                self.note_head(size=note_size)
+                self.move_to(x + self.rnd(peak),
+                             y + self.rnd(peak),
+                             z, 0,
+                             False)
+
             sleep(0.1)
 
     ######################
