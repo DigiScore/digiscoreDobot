@@ -387,8 +387,8 @@ class Digibot(Dobot):
             # read gamepad
             report = gamepad.read(64)
             # print(report)
-            left_joysick_left_right = round((((report[0] - old_min) / (old_max - old_min)) * (new_max - new_min) + new_min), 1)
-            left_joysick_up_down = round((((report[1] - old_min) / (old_max - old_min)) * (new_max - new_min) + new_min), 1)
+            left_joysick_up_down = round((((report[0] - old_min) / (old_max - old_min)) * (new_max - new_min) + new_min), 1)
+            left_joysick_left_right = round((((report[1] - old_min) / (old_max - old_min)) * (new_max - new_min) + new_min), 1)
             right_joysick_left_right = round((((report[3] - old_min) / (old_max - old_min)) * (new_max - new_min) + new_min), 1)
             right_joysick_up_down = round((((report[4] - old_min) / (old_max - old_min)) * (new_max - new_min) + new_min), 1)
             num_buttons = report[5]
@@ -403,19 +403,21 @@ class Digibot(Dobot):
 
             # move x axis
             if left_joysick_left_right != 0:
+                print("moving left right")
                 if left_joysick_left_right > 0:
                     direction = 1
                 else:
                     direction = -1
-                self.move_to_relative(5 * direction, y, z, r)
+                self.move_to(x + (5 * direction), y, z, r)
 
             # move y axis
             if left_joysick_up_down != 0:
+                print("moving up down")
                 if left_joysick_up_down > 0:
                     direction = 1
                 else:
                     direction = -1
-                self.move_to_relative(x, 5 * direction, z, r)
+                self.move_to(x, y + (5 * direction), z, r)
 
             # move pen z up or down
             if all_other_buttons == 2:
@@ -453,7 +455,7 @@ class Digibot(Dobot):
                              z, 0,
                              False)
 
-            sleep(0.1)
+            sleep(0.05)
 
     ######################
     # DIGIBOT CONTROLS
