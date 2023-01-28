@@ -122,6 +122,7 @@ class Digibot(Dobot):
 
                 # 1. clear the alarms
                 self.clear_alarms()
+                # todo - togg
                 # self.move_y()
 
                 # calc rhythmic intensity based on self-awareness factor & global speed
@@ -408,7 +409,7 @@ class Digibot(Dobot):
                     direction = 1
                 else:
                     direction = -1
-                self.move_to(x + (5 * direction), y, z, r)
+                self.move_to(x + (10 * direction), y, z, r)
 
             # move y axis
             if left_joysick_up_down != 0:
@@ -417,7 +418,7 @@ class Digibot(Dobot):
                     direction = 1
                 else:
                     direction = -1
-                self.move_to(x, y + (5 * direction), z, r)
+                self.move_to(x, y + (10 * direction), z, r)
 
             # move pen z up or down
             if all_other_buttons == 2:
@@ -432,9 +433,9 @@ class Digibot(Dobot):
             elif num_buttons == 47:
                 squiggle_list = []
                 for n in range(randrange(2, 4)):
-                    squiggle_list.append((randrange(-5, 5) / 5,
-                                          randrange(-5, 5) / 5,
-                                          randrange(-5, 5) / 5)
+                    squiggle_list.append((randrange(-10, 10) / 5,
+                                          randrange(-10, 10) / 5,
+                                          randrange(-10, 10) / 5)
                                          )
                 self.squiggle(squiggle_list)
 

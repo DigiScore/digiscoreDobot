@@ -112,7 +112,7 @@ class AIFactory:
     def put_pred(self, which_dict, pred):
         # save full output list to master output field
         out_pred_val = pred[0]
-        # setattr(self.datadict, 'master_output', out_pred_val)
+        setattr(self.datadict, 'master_output', out_pred_val)
         # print(f"master move output ==  {out_pred_val}")
 
         # get random variable and save to data dict

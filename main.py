@@ -129,10 +129,11 @@ class Main:
 
 
 if __name__ == "__main__":
-    Main(duration_of_piece=200,
+    Main(duration_of_piece=180,
          continuous_line=False,
          speed=10,
          staves=0,
          pen=True,
-         joystick=True)
+         joystick=False)
+
 
